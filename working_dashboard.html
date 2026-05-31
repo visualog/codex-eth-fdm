@@ -728,6 +728,38 @@
       min-width: 0;
     }
 
+    .live-snapshot {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      border-top: 1px solid var(--live-line);
+      padding-top: 14px;
+    }
+
+    .live-snapshot-item {
+      border: 1px solid var(--live-line);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--live-panel);
+      min-width: 0;
+    }
+
+    .live-snapshot-label {
+      color: var(--live-muted);
+      font-size: 11px;
+      font-weight: 680;
+      margin-bottom: 5px;
+      overflow-wrap: anywhere;
+    }
+
+    .live-snapshot-value {
+      color: var(--live-ink);
+      font-size: 14px;
+      font-weight: 740;
+      overflow-wrap: anywhere;
+    }
+
     .live-label {
       color: var(--live-muted);
       font-size: 12px;
@@ -853,6 +885,15 @@
       border-right: 1px solid var(--live-line);
     }
 
+    .chart-overlay-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      padding-right: 10px;
+      border-right: 1px solid var(--live-line);
+    }
+
     .chart-mode-button {
       border: 0;
       border-radius: 6px;
@@ -899,6 +940,12 @@
     .live-chart .current-line { stroke: var(--live-current); stroke-dasharray: 4 4; }
     .live-chart .latest-guide { stroke: var(--live-positive); stroke-width: 1.3; stroke-dasharray: 4 4; }
     .live-chart .current-label { fill: var(--live-ink); font-size: 10px; text-anchor: end; }
+    .live-chart .overlay-line { stroke-width: 1.4; stroke-dasharray: 6 4; }
+    .live-chart .overlay-label { fill: var(--live-ink); font-size: 10px; text-anchor: start; paint-order: stroke; stroke: var(--live-bg); stroke-width: 3px; }
+    .live-chart .overlay-high, .live-chart .overlay-tp { stroke: var(--live-positive); }
+    .live-chart .overlay-low, .live-chart .overlay-risk { stroke: var(--live-negative); }
+    .live-chart .overlay-entry { stroke: var(--accent); }
+    .live-chart .overlay-trail { stroke: var(--warn); }
     .live-chart .range-band { fill: color-mix(in srgb, var(--live-positive) 13%, transparent); stroke: color-mix(in srgb, var(--live-positive) 26%, transparent); stroke-width: 1; }
     .live-chart .area { fill: color-mix(in srgb, var(--live-positive) 18%, transparent); }
     .live-chart .line { stroke: var(--live-positive); stroke-width: 3; }
@@ -1209,6 +1256,7 @@
       .score-grid, .profit-form, .profit-stats, .backtest-stats, .quality-grid, .evidence-grid { grid-template-columns: 1fr; }
       .live-market { padding: 14px; }
       .live-stats { grid-template-columns: 1fr; }
+      .live-snapshot { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .live-chart { height: 240px; }
       .live-chart-head { display: block; }
       .live-chart-actions { justify-content: flex-start; flex-wrap: wrap; margin-top: 4px; }
@@ -1255,6 +1303,14 @@
         <div class="live-stat"><div class="live-label" data-i18n="range24hValue">변동폭</div><div class="live-value" id="liveRangeValue">--</div></div>
         <div class="live-range" id="liveRangePosition"></div>
       </div>
+      <div class="live-snapshot" aria-label="실시간 핵심 지표">
+        <div class="live-snapshot-item"><div class="live-snapshot-label" data-i18n="snapshotPrice">현재가</div><div class="live-snapshot-value" id="snapshotPrice">--</div></div>
+        <div class="live-snapshot-item"><div class="live-snapshot-label" data-i18n="snapshotChange">24시간 변화</div><div class="live-snapshot-value" id="snapshotChange">--</div></div>
+        <div class="live-snapshot-item"><div class="live-snapshot-label" data-i18n="snapshotVolume">거래대금</div><div class="live-snapshot-value" id="snapshotVolume">--</div></div>
+        <div class="live-snapshot-item"><div class="live-snapshot-label" data-i18n="snapshotRange">24시간 위치</div><div class="live-snapshot-value" id="snapshotRange">--</div></div>
+        <div class="live-snapshot-item"><div class="live-snapshot-label" data-i18n="snapshotRegime">시장 국면</div><div class="live-snapshot-value" id="snapshotRegime">--</div></div>
+        <div class="live-snapshot-item"><div class="live-snapshot-label" data-i18n="snapshotRisk">리스크 점수</div><div class="live-snapshot-value" id="snapshotRisk">--</div></div>
+      </div>
       <div class="live-chart-panel">
         <div class="live-chart-head">
           <div>
@@ -1268,6 +1324,12 @@
               <button class="chart-mode-button active" type="button" data-chart-range="1h">1시간</button>
               <button class="chart-mode-button" type="button" data-chart-range="4h">4시간</button>
               <button class="chart-mode-button" type="button" data-chart-range="24h">24시간</button>
+            </div>
+            <div class="chart-overlay-group" role="group" aria-label="차트 판단선">
+              <button class="chart-mode-button active" type="button" data-chart-overlay="range">24h</button>
+              <button class="chart-mode-button" type="button" data-chart-overlay="entry">진입</button>
+              <button class="chart-mode-button" type="button" data-chart-overlay="targets">익절</button>
+              <button class="chart-mode-button" type="button" data-chart-overlay="risk">리스크</button>
             </div>
             <div class="chart-mode-group" role="group" aria-label="차트 보기 방식">
               <button class="chart-mode-button" type="button" data-chart-mode="line">라인</button>
@@ -1506,6 +1568,12 @@
       "4h": { interval: "5m", limit: 48, titleKey: "liveChartTitle4h", scopeKey: "liveChartScope4h", labelKey: "chartRange4h" },
       "24h": { interval: "15m", limit: 96, titleKey: "liveChartTitle24h", scopeKey: "liveChartScope24h", labelKey: "chartRange24h" }
     };
+    const LIVE_CHART_OVERLAYS = {
+      range: { labelKey: "overlayRange" },
+      entry: { labelKey: "overlayEntry" },
+      targets: { labelKey: "overlayTargets" },
+      risk: { labelKey: "overlayRisk" }
+    };
     const LOWER_IS_BETTER_METRICS = new Set(["eth_volatility", "eth_drawdown"]);
 
     const cache = new Map();
@@ -1525,6 +1593,7 @@
     let currentTheme = getStoredTheme();
     let liveChartMode = loadLiveChartMode();
     let liveChartRange = loadLiveChartRange();
+    let liveChartOverlays = loadLiveChartOverlays();
     let scoreState = null;
     let backtestState = null;
     let backtestRows = [];
@@ -1568,6 +1637,17 @@
         chartRange1h: "1시간",
         chartRange4h: "4시간",
         chartRange24h: "24시간",
+        chartOverlayLabel: "차트 판단선",
+        overlayRange: "24h",
+        overlayEntry: "진입",
+        overlayTargets: "익절",
+        overlayRisk: "리스크",
+        snapshotPrice: "현재가",
+        snapshotChange: "24시간 변화",
+        snapshotVolume: "거래대금",
+        snapshotRange: "24시간 위치",
+        snapshotRegime: "시장 국면",
+        snapshotRisk: "리스크 점수",
         refreshCadence: "15초 갱신",
         sixtyMinuteClose: "최근 1시간 가격",
         liveChartScope: "1분 단위",
@@ -1582,6 +1662,13 @@
         oneMinuteCandles: "마우스를 올리면 시각과 가격을 확인할 수 있습니다.",
         oneMinuteCloses: "1분 단위 가격",
         range24h: "24시간 범위에서 현재가 위치",
+        overlayHigh24h: "24h 고가",
+        overlayLow24h: "24h 저가",
+        overlayEntryLine: "진입가",
+        overlayTakeProfit1: "1차 익절",
+        overlayTakeProfit2: "2차 익절",
+        overlayTrailingStop: "추적 손절",
+        overlayInvalidation: "무효화",
         rangeLow: "저가",
         rangeCurrent: "현재가",
         rangeHigh: "고가",
@@ -1782,6 +1869,17 @@
         chartRange1h: "1h",
         chartRange4h: "4h",
         chartRange24h: "24h",
+        chartOverlayLabel: "Chart decision lines",
+        overlayRange: "24h",
+        overlayEntry: "Entry",
+        overlayTargets: "Targets",
+        overlayRisk: "Risk",
+        snapshotPrice: "Price",
+        snapshotChange: "24h change",
+        snapshotVolume: "Volume",
+        snapshotRange: "24h position",
+        snapshotRegime: "Regime",
+        snapshotRisk: "Risk score",
         refreshCadence: "15s refresh",
         sixtyMinuteClose: "Last 1 hour price",
         liveChartScope: "1-minute intervals",
@@ -1796,6 +1894,13 @@
         oneMinuteCandles: "Hover to inspect time and price.",
         oneMinuteCloses: "one-minute prices",
         range24h: "Current price inside the 24h range",
+        overlayHigh24h: "24h high",
+        overlayLow24h: "24h low",
+        overlayEntryLine: "Entry",
+        overlayTakeProfit1: "Take-profit 1",
+        overlayTakeProfit2: "Take-profit 2",
+        overlayTrailingStop: "Trailing stop",
+        overlayInvalidation: "Invalidation",
         rangeLow: "low",
         rangeCurrent: "current",
         rangeHigh: "high",
@@ -2091,6 +2196,24 @@
       }
     }
 
+    function loadLiveChartOverlays() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem("ethLiveChartOverlays") || "[]");
+        const selected = Array.isArray(parsed) ? parsed.filter(item => LIVE_CHART_OVERLAYS[item]) : [];
+        return new Set(selected.length ? selected : ["range"]);
+      } catch (error) {
+        return new Set(["range"]);
+      }
+    }
+
+    function storeLiveChartOverlays() {
+      try {
+        localStorage.setItem("ethLiveChartOverlays", JSON.stringify([...liveChartOverlays].filter(item => LIVE_CHART_OVERLAYS[item])));
+      } catch (error) {
+        // Local storage can be unavailable in hardened file contexts.
+      }
+    }
+
     function liveKlineUrl() {
       const config = LIVE_CHART_RANGES[liveChartRange] || LIVE_CHART_RANGES["1h"];
       return `https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=${config.interval}&limit=${config.limit}`;
@@ -2171,6 +2294,7 @@
       applyStaticTranslations();
       updateLiveChartModeButtons();
       updateLiveChartRangeButtons();
+      updateLiveChartOverlayButtons();
       renderLiveMarket();
       renderFilters();
       if (selectedId) {
@@ -2236,6 +2360,19 @@
       if (group) group.setAttribute("aria-label", t("chartRangeLabel"));
     }
 
+    function updateLiveChartOverlayButtons() {
+      const buttons = document.querySelectorAll("[data-chart-overlay]");
+      buttons.forEach(button => {
+        const overlay = button.dataset.chartOverlay;
+        const config = LIVE_CHART_OVERLAYS[overlay];
+        if (config) button.textContent = t(config.labelKey);
+        button.classList.toggle("active", liveChartOverlays.has(overlay));
+        button.setAttribute("aria-pressed", liveChartOverlays.has(overlay) ? "true" : "false");
+      });
+      const group = document.querySelector(".chart-overlay-group");
+      if (group) group.setAttribute("aria-label", t("chartOverlayLabel"));
+    }
+
     function initLiveChartControls() {
       const buttons = document.querySelectorAll("[data-chart-mode]");
       updateLiveChartModeButtons();
@@ -2258,6 +2395,20 @@
         updateLiveChartRangeButtons();
         renderLiveMarket();
         refreshLiveMarket();
+      }));
+      const overlayButtons = document.querySelectorAll("[data-chart-overlay]");
+      updateLiveChartOverlayButtons();
+      overlayButtons.forEach(button => button.addEventListener("click", () => {
+        const overlay = button.dataset.chartOverlay;
+        if (!LIVE_CHART_OVERLAYS[overlay]) return;
+        if (liveChartOverlays.has(overlay)) {
+          liveChartOverlays.delete(overlay);
+        } else {
+          liveChartOverlays.add(overlay);
+        }
+        storeLiveChartOverlays();
+        updateLiveChartOverlayButtons();
+        renderLiveMarket();
       }));
     }
 
@@ -2734,6 +2885,31 @@
       })), maxPoints);
     }
 
+    function computeProfitLevels(updateLocalHigh = false) {
+      const price = liveState.ticker?.lastPrice || latestValue("eth_price");
+      const mode = STRATEGY_MODES[profitSettings.mode] || STRATEGY_MODES.balanced;
+      const entry = profitSettings.entryPrice;
+      const hasEntry = Number.isFinite(entry) && entry > 0;
+      if (!hasEntry && profitSettings.localHigh && updateLocalHigh) {
+        profitSettings.localHigh = 0;
+        saveProfitSettings();
+      }
+      if (hasEntry && Number.isFinite(price) && updateLocalHigh) {
+        const baselineHigh = Math.max(entry, price);
+        if (!Number.isFinite(profitSettings.localHigh) || profitSettings.localHigh < baselineHigh) {
+          profitSettings.localHigh = baselineHigh;
+          saveProfitSettings();
+        }
+      }
+      const pnl = hasEntry && Number.isFinite(price) ? ((price - entry) / entry) * 100 : NaN;
+      const tp1 = hasEntry ? entry * (1 + mode.tp1) : NaN;
+      const tp2 = hasEntry ? entry * (1 + mode.tp2) : NaN;
+      const trail = hasEntry && Number.isFinite(profitSettings.localHigh) && profitSettings.localHigh > entry ? profitSettings.localHigh * (1 - mode.trail) : NaN;
+      const invalidation = hasEntry ? entry * (1 - mode.maxDrawdown) : NaN;
+      const portfolioRisk = hasEntry ? (Number(profitSettings.maxPosition) || 25) * mode.maxDrawdown : NaN;
+      return { price, mode, entry, hasEntry, pnl, tp1, tp2, trail, invalidation, portfolioRisk };
+    }
+
     function parseDailyKlines(rows) {
       if (!Array.isArray(rows)) throw new Error("daily kline response unavailable");
       return rows.map(row => ({ date: new Date(Number(row[0])).toISOString().slice(0, 10), value: Number(row[4]) }))
@@ -2840,6 +3016,40 @@
       }).join("");
       const priceLabels = `<text class="price-label" x="${width - padX}" y="${padTop + 4}">${escapeHtml(formatPrice(max))}</text>
         <text class="price-label" x="${width - padX}" y="${chartBottom - 4}">${escapeHtml(formatPrice(min))}</text>`;
+      const profitLevels = computeProfitLevels(false);
+      const overlayCandidates = [];
+      const ticker = liveState.ticker;
+      if (liveChartOverlays.has("range") && ticker) {
+        overlayCandidates.push(
+          { value: ticker.highPrice, label: t("overlayHigh24h"), className: "overlay-high" },
+          { value: ticker.lowPrice, label: t("overlayLow24h"), className: "overlay-low" }
+        );
+      }
+      if (liveChartOverlays.has("entry") && profitLevels.hasEntry) {
+        overlayCandidates.push({ value: profitLevels.entry, label: t("overlayEntryLine"), className: "overlay-entry" });
+      }
+      if (liveChartOverlays.has("targets") && profitLevels.hasEntry) {
+        overlayCandidates.push(
+          { value: profitLevels.tp1, label: t("overlayTakeProfit1"), className: "overlay-tp" },
+          { value: profitLevels.tp2, label: t("overlayTakeProfit2"), className: "overlay-tp" }
+        );
+      }
+      if (liveChartOverlays.has("risk") && profitLevels.hasEntry) {
+        overlayCandidates.push(
+          { value: profitLevels.trail, label: t("overlayTrailingStop"), className: "overlay-trail" },
+          { value: profitLevels.invalidation, label: t("overlayInvalidation"), className: "overlay-risk" }
+        );
+      }
+      const overlayLines = overlayCandidates
+        .filter(item => Number.isFinite(item.value) && item.value >= min && item.value <= max)
+        .map((item, index) => {
+          const y = yFor(item.value);
+          const labelY = Math.min(chartBottom - 4, Math.max(padTop + 10, y - 4 + index * 2));
+          return `<g>
+            <line class="overlay-line ${item.className}" x1="${padX}" y1="${y.toFixed(2)}" x2="${width - padX}" y2="${y.toFixed(2)}"></line>
+            <text class="overlay-label" x="${padX + 4}" y="${labelY.toFixed(2)}">${escapeHtml(item.label)} ${escapeHtml(formatPrice(item.value))}</text>
+          </g>`;
+        }).join("");
       const hitWidth = (width - padX * 2) / Math.max(series.length - 1, 1);
       const candleWidth = Math.max(2, Math.min(7, hitWidth * 0.55));
       const candles = showCandles ? series.map((point, index) => {
@@ -2897,6 +3107,7 @@
         <line class="current-line" x1="${padX}" y1="${lastY.toFixed(2)}" x2="${width - padX}" y2="${lastY.toFixed(2)}"></line>
         <line class="latest-guide" x1="${lastX.toFixed(2)}" y1="${padTop}" x2="${lastX.toFixed(2)}" y2="${chartBottom}"></line>
         ${mainSeries}
+        ${overlayLines}
         ${lastMarker}
         <text class="current-label" x="${width - padX}" y="${Math.max(padTop + 12, lastY - 6).toFixed(2)}">${escapeHtml(formatPrice(series[series.length - 1].value))}</text>
         ${priceLabels}
@@ -2932,6 +3143,25 @@
       return t("refreshCadence");
     }
 
+    function renderLiveSnapshot(ticker) {
+      const hasValues = Boolean(ticker);
+      const change = hasValues ? ticker.priceChangePercent : NaN;
+      const rangePosition = hasValues && Number.isFinite(ticker.lowPrice) && Number.isFinite(ticker.highPrice) && ticker.highPrice > ticker.lowPrice
+        ? ((ticker.lastPrice - ticker.lowPrice) / (ticker.highPrice - ticker.lowPrice)) * 100
+        : NaN;
+      const riskScore = scoreState?.scores?.find(score => score.name === "Risk")?.value;
+      const setText = (id, value) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = value;
+      };
+      setText("snapshotPrice", hasValues ? formatPrice(ticker.lastPrice) : "--");
+      setText("snapshotChange", Number.isFinite(change) ? `${change >= 0 ? "+" : ""}${change.toFixed(2)}%` : "--");
+      setText("snapshotVolume", hasValues ? formatUsd(ticker.quoteVolume) : "--");
+      setText("snapshotRange", Number.isFinite(rangePosition) ? `${Math.min(100, Math.max(0, rangePosition)).toFixed(0)}%` : "--");
+      setText("snapshotRegime", scoreState?.regime?.label || "--");
+      setText("snapshotRisk", Number.isFinite(riskScore) ? String(Math.round(riskScore)) : "--");
+    }
+
     function renderLiveMarket() {
       const statusEl = document.getElementById("liveStatus");
       const priceEl = document.getElementById("livePrice");
@@ -2951,6 +3181,7 @@
       document.getElementById("liveHigh").textContent = hasValues ? formatPrice(ticker.highPrice) : "--";
       document.getElementById("liveLow").textContent = hasValues ? formatPrice(ticker.lowPrice) : "--";
       document.getElementById("liveRangeValue").textContent = hasValues && Number.isFinite(ticker.highPrice) && Number.isFinite(ticker.lowPrice) ? formatPrice(ticker.highPrice - ticker.lowPrice) : "--";
+      computeProfitLevels(true);
       const liveChartEl = document.getElementById("liveChart");
       liveChartEl.innerHTML = renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode);
       const rangeConfig = LIVE_CHART_RANGES[liveChartRange] || LIVE_CHART_RANGES["1h"];
@@ -2960,6 +3191,7 @@
       if (chartScopeEl) chartScopeEl.textContent = t(rangeConfig.scopeKey);
       document.getElementById("liveChartMeta").textContent = t("oneMinuteCandles");
       document.getElementById("liveRangePosition").innerHTML = renderLiveRange(ticker);
+      renderLiveSnapshot(ticker);
       if (messageEl) {
         if (liveState.status === "live") {
           messageEl.innerHTML = renderLiveSourceMessage();
@@ -2980,6 +3212,7 @@
       renderBacktest();
       renderQualityPanel(state);
       renderJournal();
+      renderLiveSnapshot(liveState.ticker);
     }
 
     function renderDecisionPanel(state) {
@@ -3055,27 +3288,7 @@
     }
 
     function renderProfitPanel() {
-      const price = liveState.ticker?.lastPrice || latestValue("eth_price");
-      const mode = STRATEGY_MODES[profitSettings.mode] || STRATEGY_MODES.balanced;
-      const entry = profitSettings.entryPrice;
-      const hasEntry = Number.isFinite(entry) && entry > 0;
-      if (!hasEntry && profitSettings.localHigh) {
-        profitSettings.localHigh = 0;
-        saveProfitSettings();
-      }
-      if (hasEntry && Number.isFinite(price)) {
-        const baselineHigh = Math.max(entry, price);
-        if (!Number.isFinite(profitSettings.localHigh) || profitSettings.localHigh < baselineHigh) {
-          profitSettings.localHigh = baselineHigh;
-          saveProfitSettings();
-        }
-      }
-      const pnl = hasEntry ? ((price - entry) / entry) * 100 : NaN;
-      const tp1 = hasEntry ? entry * (1 + mode.tp1) : NaN;
-      const tp2 = hasEntry ? entry * (1 + mode.tp2) : NaN;
-      const trail = hasEntry && Number.isFinite(profitSettings.localHigh) && profitSettings.localHigh > entry ? profitSettings.localHigh * (1 - mode.trail) : NaN;
-      const invalidation = hasEntry ? entry * (1 - mode.maxDrawdown) : NaN;
-      const portfolioRisk = hasEntry ? (Number(profitSettings.maxPosition) || 25) * mode.maxDrawdown : NaN;
+      const { price, hasEntry, pnl, tp1, tp2, trail, invalidation, portfolioRisk } = computeProfitLevels(true);
       const risk = scoreState?.scores?.find(score => score.name === "Risk")?.value ?? 100;
       const regimeKey = scoreState?.regime?.key || "noEdge";
       let action = hasEntry ? t("noTradeHint") : t("entryRequiredHint");
@@ -3100,6 +3313,10 @@
       document.getElementById("localHighValue").textContent = Number.isFinite(profitSettings.localHigh) && profitSettings.localHigh > 0 ? formatPrice(profitSettings.localHigh) : "--";
       document.getElementById("positionLimit").textContent = `${profitSettings.maxPosition || 25}%`;
       document.getElementById("portfolioRisk").textContent = Number.isFinite(portfolioRisk) ? `~${portfolioRisk.toFixed(2)}%` : "--";
+      if (liveState.series.length) {
+        const liveChartEl = document.getElementById("liveChart");
+        liveChartEl.innerHTML = renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode);
+      }
     }
 
     function alignSeriesByDate(ids) {
