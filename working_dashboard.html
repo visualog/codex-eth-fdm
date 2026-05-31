@@ -925,14 +925,14 @@
       border-top: 1px solid var(--live-line);
       padding-top: 6px;
       opacity: 1;
-      transform: translateY(0);
-      transition: opacity 170ms var(--ease-out-quart), transform 170ms var(--ease-out-quart);
+      transform: translateY(0) scale(1);
+      transition: opacity 210ms var(--ease-out-quart), transform 210ms var(--ease-out-quart);
       will-change: opacity, transform;
     }
 
     .live-chart.is-transitioning {
-      opacity: 0.54;
-      transform: translateY(4px);
+      opacity: 0.18;
+      transform: translateY(10px) scale(0.992);
     }
 
     .live-chart svg {
@@ -1624,6 +1624,8 @@
     let liveChartMode = loadLiveChartMode();
     let liveChartRange = loadLiveChartRange();
     let liveChartOverlays = loadLiveChartOverlays();
+    let animateNextLiveChart = false;
+    let liveChartTransitionTimer = null;
     let scoreState = null;
     let backtestState = null;
     let backtestRows = [];
@@ -2412,6 +2414,7 @@
         liveChartMode = mode;
         storeLiveChartMode(liveChartMode);
         updateLiveChartModeButtons();
+        animateNextLiveChart = true;
         renderLiveMarket();
       }));
       const rangeButtons = document.querySelectorAll("[data-chart-range]");
@@ -2421,10 +2424,9 @@
         if (!LIVE_CHART_RANGES[range] || range === liveChartRange) return;
         liveChartRange = range;
         storeLiveChartRange(liveChartRange);
-        liveState = { ...liveState, status: "loading", series: [] };
+        liveState = { ...liveState, status: "loading" };
         updateLiveChartRangeButtons();
-        renderLiveMarket();
-        refreshLiveMarket();
+        refreshLiveMarket(true);
       }));
       const overlayButtons = document.querySelectorAll("[data-chart-overlay]");
       updateLiveChartOverlayButtons();
@@ -2438,6 +2440,7 @@
         }
         storeLiveChartOverlays();
         updateLiveChartOverlayButtons();
+        animateNextLiveChart = true;
         renderLiveMarket();
       }));
     }
@@ -3208,21 +3211,27 @@
       setText("snapshotRisk", Number.isFinite(riskScore) ? String(Math.round(riskScore)) : "--");
     }
 
-    function replaceLiveChart(html) {
+    function replaceLiveChart(html, animate = false) {
       const liveChartEl = document.getElementById("liveChart");
       if (!liveChartEl) return;
       const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-      if (reduceMotion) {
+      if (liveChartTransitionTimer) {
+        clearTimeout(liveChartTransitionTimer);
+        liveChartTransitionTimer = null;
+      }
+      if (reduceMotion || !animate) {
         liveChartEl.innerHTML = html;
+        liveChartEl.classList.remove("is-transitioning");
         return;
       }
       liveChartEl.classList.add("is-transitioning");
-      window.requestAnimationFrame(() => {
+      liveChartTransitionTimer = setTimeout(() => {
         liveChartEl.innerHTML = html;
         window.requestAnimationFrame(() => {
           liveChartEl.classList.remove("is-transitioning");
+          liveChartTransitionTimer = null;
         });
-      });
+      }, 120);
     }
 
     function renderLiveMarket() {
@@ -3246,7 +3255,9 @@
       document.getElementById("liveRangeValue").textContent = hasValues && Number.isFinite(ticker.highPrice) && Number.isFinite(ticker.lowPrice) ? formatPrice(ticker.highPrice - ticker.lowPrice) : "--";
       computeProfitLevels(true);
       const liveChartEl = document.getElementById("liveChart");
-      replaceLiveChart(renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode));
+      const shouldAnimateChart = animateNextLiveChart;
+      animateNextLiveChart = false;
+      replaceLiveChart(renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode), shouldAnimateChart);
       const rangeConfig = LIVE_CHART_RANGES[liveChartRange] || LIVE_CHART_RANGES["1h"];
       const chartTitleEl = document.querySelector("[data-i18n='sixtyMinuteClose']");
       const chartScopeEl = document.querySelector("[data-i18n='liveChartScope']");
@@ -3589,7 +3600,7 @@
       }).join("");
     }
 
-    async function refreshLiveMarket() {
+    async function refreshLiveMarket(animateChart = false) {
       const requestedRange = liveChartRange;
       const rangeConfig = LIVE_CHART_RANGES[requestedRange] || LIVE_CHART_RANGES["1h"];
       try {
@@ -3612,6 +3623,7 @@
           error: error.message || String(error)
         };
       }
+      if (animateChart) animateNextLiveChart = true;
       renderLiveMarket();
     }
 
