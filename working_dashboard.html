@@ -31,6 +31,7 @@
       --track: #eef1f4;
       --button-bg: var(--ink);
       --button-ink: #ffffff;
+      --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
       --live-bg: var(--panel);
       --live-panel: var(--surface);
       --live-panel-strong: var(--surface-2);
@@ -923,6 +924,15 @@
       height: 300px;
       border-top: 1px solid var(--live-line);
       padding-top: 6px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 170ms var(--ease-out-quart), transform 170ms var(--ease-out-quart);
+      will-change: opacity, transform;
+    }
+
+    .live-chart.is-transitioning {
+      opacity: 0.54;
+      transform: translateY(4px);
     }
 
     .live-chart svg {
@@ -999,6 +1009,18 @@
     .live-chart .hover-zone:focus ~ .hover-dot,
     .live-chart .hover-zone:focus ~ .hover-tooltip {
       opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .live-chart,
+      .chart-mode-button {
+        transition-duration: 0.01ms !important;
+      }
+
+      .live-chart.is-transitioning {
+        opacity: 1;
+        transform: none;
+      }
     }
 
     @keyframes livePulse {
@@ -3186,6 +3208,23 @@
       setText("snapshotRisk", Number.isFinite(riskScore) ? String(Math.round(riskScore)) : "--");
     }
 
+    function replaceLiveChart(html) {
+      const liveChartEl = document.getElementById("liveChart");
+      if (!liveChartEl) return;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      if (reduceMotion) {
+        liveChartEl.innerHTML = html;
+        return;
+      }
+      liveChartEl.classList.add("is-transitioning");
+      window.requestAnimationFrame(() => {
+        liveChartEl.innerHTML = html;
+        window.requestAnimationFrame(() => {
+          liveChartEl.classList.remove("is-transitioning");
+        });
+      });
+    }
+
     function renderLiveMarket() {
       const statusEl = document.getElementById("liveStatus");
       const priceEl = document.getElementById("livePrice");
@@ -3207,7 +3246,7 @@
       document.getElementById("liveRangeValue").textContent = hasValues && Number.isFinite(ticker.highPrice) && Number.isFinite(ticker.lowPrice) ? formatPrice(ticker.highPrice - ticker.lowPrice) : "--";
       computeProfitLevels(true);
       const liveChartEl = document.getElementById("liveChart");
-      liveChartEl.innerHTML = renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode);
+      replaceLiveChart(renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode));
       const rangeConfig = LIVE_CHART_RANGES[liveChartRange] || LIVE_CHART_RANGES["1h"];
       const chartTitleEl = document.querySelector("[data-i18n='sixtyMinuteClose']");
       const chartScopeEl = document.querySelector("[data-i18n='liveChartScope']");
@@ -3339,7 +3378,7 @@
       document.getElementById("portfolioRisk").textContent = Number.isFinite(portfolioRisk) ? `~${portfolioRisk.toFixed(2)}%` : "--";
       if (liveState.series.length) {
         const liveChartEl = document.getElementById("liveChart");
-        liveChartEl.innerHTML = renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode);
+        replaceLiveChart(renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode));
       }
     }
 
