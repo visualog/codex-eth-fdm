@@ -1,0 +1,3479 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이더리움 펀더멘털 대시보드</title>
+  <style>
+    :root {
+      --bg: #f6f7f2;
+      --header: #ffffff;
+      --panel: #ffffff;
+      --surface: #fbfcfd;
+      --surface-2: #f8fbff;
+      --surface-danger: #fffafa;
+      --input-bg: #ffffff;
+      --control-bg: #ffffff;
+      --control-hover: #f8fafc;
+      --ink: #17191c;
+      --muted: #69707a;
+      --line: #d9ddd4;
+      --line-strong: #aeb6c7;
+      --accent: #2952cc;
+      --accent-soft: rgba(41, 82, 204, 0.12);
+      --accent-surface: #f8fbff;
+      --accent-2: #0f8a6a;
+      --warn: #b45309;
+      --bad: #b42318;
+      --good: #087443;
+      --good-soft: #e7f6ee;
+      --bad-soft: #fdecea;
+      --track: #eef1f4;
+      --button-bg: var(--ink);
+      --button-ink: #ffffff;
+      --live-bg: var(--panel);
+      --live-panel: var(--surface);
+      --live-panel-strong: var(--surface-2);
+      --live-ink: var(--ink);
+      --live-muted: var(--muted);
+      --live-line: var(--line);
+      --live-grid: rgba(105, 112, 122, 0.18);
+      --live-grid-soft: rgba(105, 112, 122, 0.07);
+      --live-current: rgba(23, 25, 28, 0.32);
+      --live-tooltip-bg: rgba(255, 255, 255, 0.96);
+      --live-positive: #087443;
+      --live-negative: #b42318;
+      --shadow: 0 16px 40px rgba(23, 25, 28, 0.08);
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0f1318;
+      --header: #121820;
+      --panel: #151b23;
+      --surface: #10161d;
+      --surface-2: #18202a;
+      --surface-danger: #261819;
+      --input-bg: #0f151c;
+      --control-bg: #10161d;
+      --control-hover: #18202a;
+      --ink: #edf2f7;
+      --muted: #9aa6b5;
+      --line: #2b3542;
+      --line-strong: #465466;
+      --accent: #8fb3ff;
+      --accent-soft: rgba(143, 179, 255, 0.16);
+      --accent-surface: #162033;
+      --accent-2: #6ee7a8;
+      --warn: #f8d38c;
+      --bad: #ff9d94;
+      --good: #6ee7a8;
+      --good-soft: rgba(110, 231, 168, 0.14);
+      --bad-soft: rgba(255, 157, 148, 0.14);
+      --track: #26303c;
+      --button-bg: #edf2f7;
+      --button-ink: #10161d;
+      --live-bg: var(--panel);
+      --live-panel: var(--surface);
+      --live-panel-strong: var(--surface-2);
+      --live-ink: var(--ink);
+      --live-muted: var(--muted);
+      --live-line: var(--line);
+      --live-grid: rgba(219, 227, 239, 0.18);
+      --live-grid-soft: rgba(219, 227, 239, 0.055);
+      --live-current: rgba(255, 255, 255, 0.34);
+      --live-tooltip-bg: rgba(16, 20, 27, 0.96);
+      --live-positive: #6ee7a8;
+      --live-negative: #ff9d94;
+      --shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--header);
+    }
+
+    .topline {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    .stamp {
+      min-width: 220px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .header-controls {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .lang-toggle,
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--control-bg);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 720;
+      cursor: pointer;
+    }
+
+    .theme-toggle {
+      position: relative;
+      gap: 7px;
+      padding: 0 10px 0 7px;
+      min-width: 72px;
+    }
+
+    .theme-toggle::before {
+      content: "";
+      width: 24px;
+      height: 14px;
+      border-radius: 999px;
+      background: var(--track);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .theme-toggle::after {
+      content: "";
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--ink);
+      transform: translateY(-50%);
+      transition: transform 160ms ease, background 160ms ease;
+    }
+
+    .theme-toggle.active::before {
+      background: var(--good-soft);
+    }
+
+    .theme-toggle.active::after {
+      transform: translate(10px, -50%);
+      background: var(--good);
+    }
+
+    .lang-toggle:hover,
+    .theme-toggle:hover {
+      border-color: var(--line-strong);
+      background: var(--control-hover);
+    }
+
+    .info-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: transparent;
+      color: inherit;
+      font-size: 12px;
+      font-weight: 780;
+      line-height: 1;
+      cursor: help;
+      vertical-align: middle;
+    }
+
+    .info-trigger.dark {
+      color: var(--muted);
+      border-color: var(--line);
+      background: var(--control-bg);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 10px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.25;
+    }
+
+    .info-modal {
+      position: fixed;
+      z-index: 100;
+      top: 18px;
+      right: 18px;
+      width: min(420px, calc(100vw - 32px));
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: 0 18px 46px rgba(23, 25, 28, 0.18);
+      padding: 15px;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: opacity 140ms ease, transform 140ms ease;
+    }
+
+    .info-modal.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .info-modal-title {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .info-modal-body {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    main {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 22px 28px 34px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .decision-layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .decision-panel,
+    .profit-panel,
+    .backtest-panel,
+    .journal-panel,
+    .quality-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 720;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .panel-title {
+      margin: 0 0 10px;
+      font-size: 19px;
+      line-height: 1.22;
+    }
+
+    .panel-note {
+      margin: -4px 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .decision-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .regime {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .stance {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .confidence {
+      min-width: 90px;
+      text-align: right;
+    }
+
+    .confidence-value {
+      font-size: 28px;
+      font-weight: 780;
+      line-height: 1;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .evidence-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--surface);
+      min-width: 0;
+    }
+
+    .evidence-box h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+    }
+
+    .evidence-box ul,
+    .journal-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .score-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      min-width: 0;
+    }
+
+    .score-name {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+      min-height: 30px;
+    }
+
+    .score-value {
+      font-size: 30px;
+      font-weight: 780;
+      line-height: 1;
+      margin: 8px 0;
+    }
+
+    .score-bar {
+      height: 7px;
+      border-radius: 999px;
+      background: var(--track);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      width: 0;
+    }
+
+    .score-fill.good { background: var(--good); }
+    .score-fill.warn { background: var(--warn); }
+    .score-fill.bad { background: var(--bad); }
+
+    .score-detail {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .profit-form {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font: inherit;
+      color: var(--ink);
+      background: var(--input-bg);
+    }
+
+    .field textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    .profit-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .backtest-stats,
+    .quality-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px;
+      background: var(--surface);
+      min-width: 0;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 760;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .action-button {
+      border: 1px solid var(--line);
+      background: var(--button-bg);
+      color: var(--button-ink);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 720;
+      cursor: pointer;
+    }
+
+    .action-button.secondary {
+      background: var(--control-bg);
+      color: var(--ink);
+    }
+
+    .full-width-panel {
+      margin-bottom: 18px;
+    }
+
+    .intel {
+      display: grid;
+      grid-template-columns: 1.05fr repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .intel-head,
+    .intel-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .intel-head {
+      border-color: var(--line-strong);
+      background: var(--accent-surface);
+    }
+
+    .intel-eyebrow,
+    .intel-source {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 720;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .intel-title {
+      margin: 7px 0 8px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .intel-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .intel-link {
+      display: inline-flex;
+      margin-top: 10px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 720;
+      text-decoration: none;
+    }
+
+    .live-market {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.88fr) minmax(420px, 1.35fr);
+      gap: 16px;
+      align-items: stretch;
+      background: var(--live-bg);
+      color: var(--live-ink);
+      border: 1px solid var(--live-line);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .live-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+      border: 1px solid var(--live-line);
+      border-radius: 8px;
+      padding: 14px;
+      background: var(--live-panel-strong);
+    }
+
+    .live-kicker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--live-muted);
+      font-size: 12px;
+      font-weight: 720;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .live-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--live-positive);
+      background: rgba(8, 116, 67, 0.28);
+      font-size: 11px;
+      line-height: 1;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .live-refresh-inline {
+      color: var(--live-muted);
+      font-size: 11px;
+      font-weight: 620;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .live-status::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 0 rgba(184, 243, 207, 0.6);
+      animation: livePulse 1.8s ease-out infinite;
+    }
+
+    .live-status.stale {
+      color: var(--warn);
+      background: rgba(180, 83, 9, 0.3);
+    }
+
+    .live-status.failed {
+      color: var(--live-negative);
+      background: rgba(180, 35, 24, 0.3);
+    }
+
+    .live-status.stale::before,
+    .live-status.failed::before {
+      animation: none;
+      box-shadow: none;
+    }
+
+    .live-symbol {
+      margin: 0;
+      font-size: 16px;
+      color: var(--live-muted);
+    }
+
+    .live-price {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 0.95;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .live-change {
+      font-size: 15px;
+      font-weight: 720;
+    }
+
+    .live-change.up { color: var(--live-positive); }
+    .live-change.down { color: var(--live-negative); }
+
+    .live-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .live-stat-scope {
+      color: var(--live-ink);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .live-copy .live-stat-scope {
+      margin-top: 2px;
+      color: var(--live-muted);
+    }
+
+    .live-stat {
+      border: 1px solid var(--live-line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--live-panel);
+      min-width: 0;
+    }
+
+    .live-label {
+      color: var(--live-muted);
+      font-size: 12px;
+      font-weight: 680;
+      margin-bottom: 6px;
+    }
+
+    .live-value {
+      font-size: 16px;
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .live-range {
+      grid-column: 1 / -1;
+      border: 1px solid var(--live-line);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--live-panel);
+    }
+
+    .live-range-title {
+      color: var(--live-muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .range-track {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--live-negative), var(--warn), var(--live-positive));
+    }
+
+    .range-marker {
+      position: absolute;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--live-bg);
+      border-radius: 50%;
+      background: var(--live-ink);
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .range-labels {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+      color: var(--live-muted);
+      font-size: 11px;
+    }
+
+    .range-labels span:nth-child(2) {
+      text-align: center;
+      color: var(--live-ink);
+      font-weight: 720;
+    }
+
+    .range-labels span:last-child {
+      text-align: right;
+    }
+
+    .live-chart-panel {
+      grid-column: 1 / -1;
+      min-width: 0;
+      border-top: 1px solid var(--live-line);
+      padding-top: 14px;
+    }
+
+    .live-chart-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      color: var(--live-ink);
+      font-size: 13px;
+    }
+
+    .live-chart-head strong,
+    .live-chart-scope {
+      display: block;
+    }
+
+    .live-chart-scope {
+      margin-top: 3px;
+      color: var(--live-muted);
+      font-size: 12px;
+      font-weight: 560;
+    }
+
+    .live-chart-meta {
+      color: var(--live-muted);
+      font-size: 12px;
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
+
+    .live-chart-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .chart-mode-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .chart-range-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      padding-right: 10px;
+      border-right: 1px solid var(--live-line);
+    }
+
+    .chart-mode-button {
+      border: 0;
+      border-radius: 6px;
+      padding: 5px 8px;
+      background: transparent;
+      color: var(--live-muted);
+      font-size: 11px;
+      font-weight: 680;
+      cursor: pointer;
+      white-space: nowrap;
+      appearance: none;
+      transition: color 160ms ease, background 160ms ease;
+    }
+
+    .chart-mode-button.active {
+      background: var(--good-soft);
+      color: var(--live-ink);
+    }
+
+    .chart-mode-button:focus-visible {
+      outline: 2px solid rgba(110, 231, 168, 0.75);
+      outline-offset: 2px;
+    }
+
+    .live-chart {
+      width: 100%;
+      height: 300px;
+      border-top: 1px solid var(--live-line);
+      padding-top: 6px;
+    }
+
+    .live-chart svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .live-chart .axis { stroke: var(--live-grid); }
+    .live-chart .minute-grid { stroke: var(--live-grid-soft); }
+    .live-chart .ten-minute-grid { stroke: var(--live-grid); stroke-dasharray: 2 6; }
+    .live-chart .axis-label { fill: var(--live-muted); font-size: 10px; }
+    .live-chart .price-label { fill: var(--live-muted); font-size: 10px; text-anchor: end; }
+    .live-chart .current-line { stroke: var(--live-current); stroke-dasharray: 4 4; }
+    .live-chart .latest-guide { stroke: var(--live-positive); stroke-width: 1.3; stroke-dasharray: 4 4; }
+    .live-chart .current-label { fill: var(--live-ink); font-size: 10px; text-anchor: end; }
+    .live-chart .range-band { fill: color-mix(in srgb, var(--live-positive) 13%, transparent); stroke: color-mix(in srgb, var(--live-positive) 26%, transparent); stroke-width: 1; }
+    .live-chart .area { fill: color-mix(in srgb, var(--live-positive) 18%, transparent); }
+    .live-chart .line { stroke: var(--live-positive); stroke-width: 3; }
+    .live-chart .candle-wick { stroke-width: 1.2; }
+    .live-chart .candle-body { rx: 1.5; }
+    .live-chart .candle-up { fill: color-mix(in srgb, var(--live-positive) 62%, transparent); stroke: var(--live-positive); }
+    .live-chart .candle-down { fill: color-mix(in srgb, var(--live-negative) 58%, transparent); stroke: var(--live-negative); }
+    .live-chart .last-point { fill: var(--live-bg); stroke: var(--live-positive); stroke-width: 2.4; }
+    .live-chart .hover-zone {
+      fill: transparent;
+      cursor: crosshair;
+      outline: none;
+      stroke: transparent;
+      stroke-width: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .live-chart .hover-zone:focus,
+    .live-chart .hover-zone:focus-visible,
+    .live-chart .hover-zone:active {
+      outline: none;
+      stroke: transparent;
+      fill: transparent;
+    }
+    .live-chart .hover-guide,
+    .live-chart .hover-dot,
+    .live-chart .hover-tooltip { opacity: 0; pointer-events: none; }
+    .live-chart .hover-guide { stroke: var(--live-current); stroke-dasharray: 3 3; }
+    .live-chart .hover-dot { fill: var(--live-bg); stroke: var(--live-ink); stroke-width: 2; }
+    .live-chart .hover-tooltip rect { fill: var(--live-tooltip-bg); stroke: var(--live-line); rx: 6; }
+    .live-chart .hover-tooltip text { fill: var(--live-ink); font-size: 11px; }
+    .live-chart .live-hover-point:hover .hover-guide,
+    .live-chart .live-hover-point:hover .hover-dot,
+    .live-chart .live-hover-point:hover .hover-tooltip,
+    .live-chart .live-hover-point:focus-within .hover-guide,
+    .live-chart .live-hover-point:focus-within .hover-dot,
+    .live-chart .live-hover-point:focus-within .hover-tooltip,
+    .live-chart .live-hover-point:active .hover-guide,
+    .live-chart .live-hover-point:active .hover-dot,
+    .live-chart .live-hover-point:active .hover-tooltip {
+      opacity: 1;
+    }
+    .live-chart .hover-zone:focus ~ .hover-guide,
+    .live-chart .hover-zone:focus ~ .hover-dot,
+    .live-chart .hover-zone:focus ~ .hover-tooltip {
+      opacity: 1;
+    }
+
+    @keyframes livePulse {
+      0% { box-shadow: 0 0 0 0 rgba(184, 243, 207, 0.6); }
+      70% { box-shadow: 0 0 0 8px rgba(184, 243, 207, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(184, 243, 207, 0); }
+    }
+
+    .summary-item {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .summary-value {
+      font-size: 26px;
+      font-weight: 720;
+      line-height: 1;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .filter {
+      border: 1px solid var(--line);
+      background: var(--control-bg);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .filter.active {
+      background: var(--button-bg);
+      color: var(--button-ink);
+      border-color: var(--button-bg);
+    }
+
+    .main-chart {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .chart-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .chart-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .chart-box {
+      width: 100%;
+      height: 320px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      min-height: 292px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .card.failed {
+      cursor: default;
+      background: var(--surface-danger);
+      border-color: var(--bad-soft);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .metric-name {
+      font-size: 14px;
+      font-weight: 720;
+      line-height: 1.25;
+      margin: 0;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 4px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--muted);
+      background: var(--track);
+    }
+
+    .badge.live { color: var(--good); background: var(--good-soft); }
+    .badge.failed { color: var(--bad); background: var(--bad-soft); }
+
+    .value {
+      font-size: 24px;
+      line-height: 1.05;
+      font-weight: 780;
+      margin-bottom: 8px;
+      overflow-wrap: normal;
+      word-break: keep-all;
+    }
+
+    .changes {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .change.up { color: var(--good); }
+    .change.down { color: var(--bad); }
+
+    .spark {
+      height: 52px;
+      width: 100%;
+      margin: auto 0 10px;
+    }
+
+    .why {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+      min-height: 50px;
+    }
+
+    .metric-read {
+      display: grid;
+      gap: 5px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .metric-read span {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-read strong {
+      color: var(--ink);
+      font-weight: 720;
+    }
+
+    .source {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .source a { color: var(--accent); text-decoration: none; }
+
+    .status {
+      margin: 18px 0 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .status h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .status-list {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    svg { display: block; width: 100%; height: 100%; }
+    .axis { stroke: var(--line); stroke-width: 1; }
+    .line { fill: none; stroke: var(--accent); stroke-width: 2.3; }
+    .area { fill: var(--accent-soft); }
+
+    @media (max-width: 1180px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .intel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .decision-layout { grid-template-columns: 1fr; }
+      .score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .profit-stats, .backtest-stats, .quality-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .live-market { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 820px) {
+      header { padding: 22px 16px 18px; }
+      main { padding: 16px; }
+      .topline { display: block; }
+      .stamp { text-align: left; margin-top: 12px; }
+      .grid { grid-template-columns: 1fr; }
+      .summary { grid-template-columns: 1fr; }
+      .intel { grid-template-columns: 1fr; }
+      .score-grid, .profit-form, .profit-stats, .backtest-stats, .quality-grid, .evidence-grid { grid-template-columns: 1fr; }
+      .live-market { padding: 14px; }
+      .live-stats { grid-template-columns: 1fr; }
+      .live-chart { height: 240px; }
+      .live-chart-head { display: block; }
+      .live-chart-actions { justify-content: flex-start; flex-wrap: wrap; margin-top: 4px; }
+      .live-chart-meta { text-align: left; }
+      .chart-head { display: block; }
+      .chart-box { height: 240px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="info-modal" id="sectionInfoModal" role="dialog" aria-live="polite" aria-hidden="true">
+    <h2 class="info-modal-title" id="sectionInfoTitle"></h2>
+    <p class="info-modal-body" id="sectionInfoBody"></p>
+  </div>
+  <header>
+    <div class="topline">
+      <div>
+        <h1 data-i18n="heroTitle">이더리움 펀더멘털</h1>
+        <p class="subtitle" data-i18n="subtitle">가치평가, 사용량, 네트워크 경제성, DeFi 유동성, L2 확장, 스테이킹 신호를 한 화면에서 봅니다. 이 화면은 로컬 파일에서 검증된 무키 공개 API 지표만 사용합니다.</p>
+      </div>
+      <div class="stamp">
+        <div class="header-controls">
+          <button class="theme-toggle" id="themeToggle" type="button" role="switch" aria-checked="false">다크</button>
+          <button class="lang-toggle" id="languageToggle" type="button" aria-label="Switch language">EN</button>
+        </div>
+        <div id="lastUpdated" data-i18n="loadingDataSources">데이터 소스 로딩 중...</div>
+        <div data-i18n="localFileNote">로컬 HTML 파일로 바로 열 수 있습니다. 빌드 단계가 필요 없습니다.</div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="live-market" aria-label="실시간 ETH 시장 데이터">
+      <div class="live-copy">
+        <div class="live-kicker"><span data-i18n="liveMarket">실시간 시장</span> <button class="info-trigger" type="button" data-info-key="liveMarketInfo" aria-label="실시간 시장 설명">i</button> <span class="live-status stale" id="liveStatus">로딩</span><span class="live-refresh-inline" id="liveRefreshInline">--</span></div>
+        <p class="live-symbol" data-i18n="liveSymbol">Binance 현물 ETH/USDT</p>
+        <div class="live-price" id="livePrice">로딩 중...</div>
+        <div class="live-change" id="liveChange" data-i18n="changePending">24시간 변동률 대기 중</div>
+        <div class="live-stat-scope" data-i18n="liveStatsScope">통계: 최근 24시간</div>
+      </div>
+      <div class="live-stats">
+        <div class="live-stat"><div class="live-label" data-i18n="quoteVolume">거래대금</div><div class="live-value" id="liveVolume">--</div></div>
+        <div class="live-stat"><div class="live-label" data-i18n="high24h">고가</div><div class="live-value" id="liveHigh">--</div></div>
+        <div class="live-stat"><div class="live-label" data-i18n="low24h">저가</div><div class="live-value" id="liveLow">--</div></div>
+        <div class="live-stat"><div class="live-label" data-i18n="range24hValue">변동폭</div><div class="live-value" id="liveRangeValue">--</div></div>
+        <div class="live-range" id="liveRangePosition"></div>
+      </div>
+      <div class="live-chart-panel">
+        <div class="live-chart-head">
+          <div>
+            <strong data-i18n="sixtyMinuteClose">최근 1시간 가격</strong>
+            <span class="live-chart-scope" data-i18n="liveChartScope">그래프: 최근 60분</span>
+          </div>
+          <div class="live-chart-actions">
+            <span class="live-chart-meta" id="liveChartMeta" data-i18n="oneMinuteCandles">마우스를 올리면 시각과 가격을 확인할 수 있습니다.</span>
+            <div class="chart-range-group" role="group" aria-label="차트 시간 범위">
+              <button class="chart-mode-button" type="button" data-chart-range="15m">15분</button>
+              <button class="chart-mode-button active" type="button" data-chart-range="1h">1시간</button>
+              <button class="chart-mode-button" type="button" data-chart-range="4h">4시간</button>
+              <button class="chart-mode-button" type="button" data-chart-range="24h">24시간</button>
+            </div>
+            <div class="chart-mode-group" role="group" aria-label="차트 보기 방식">
+              <button class="chart-mode-button" type="button" data-chart-mode="line">라인</button>
+              <button class="chart-mode-button active" type="button" data-chart-mode="range">범위</button>
+              <button class="chart-mode-button" type="button" data-chart-mode="candle">캔들</button>
+            </div>
+          </div>
+        </div>
+        <div class="live-chart" id="liveChart"></div>
+      </div>
+    </section>
+    <section class="decision-layout" aria-label="수익 의사결정 대시보드">
+      <div class="decision-panel">
+        <div class="panel-eyebrow"><span data-i18n="decisionEyebrow">의사결정 대시보드</span><button class="info-trigger dark" type="button" data-info-key="decisionInfo" aria-label="의사결정 대시보드 설명">i</button></div>
+        <div class="decision-hero">
+          <div>
+            <div class="regime" id="regimeLabel">No Edge</div>
+            <div class="stance" id="actionHint">데이터 로딩 후 진입/보유/청산 힌트를 계산합니다.</div>
+          </div>
+          <div class="confidence">
+            <div class="stat-label" data-i18n="confidence">판단 강도</div>
+            <div class="confidence-value" id="confidenceValue">--</div>
+          </div>
+        </div>
+        <p class="panel-note" id="decisionNote">판단 강도는 수익 확률이 아니라 조건 일치도입니다.</p>
+        <div class="evidence-grid">
+          <div class="evidence-box">
+            <h3 data-i18n="supportingEvidence">주요 근거</h3>
+            <ul id="supportList"></ul>
+          </div>
+          <div class="evidence-box">
+            <h3 data-i18n="riskEvidence">주요 리스크</h3>
+            <ul id="riskList"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="profit-panel">
+        <div class="panel-eyebrow"><span data-i18n="profitEyebrow">수익 실현 패널</span><button class="info-trigger dark" type="button" data-info-key="profitInfo" aria-label="수익 실현 패널 설명">i</button></div>
+        <h2 class="panel-title" id="profitAction">No trade</h2>
+        <p class="panel-note" id="profitNote">진입가를 입력하면 수익 실현 기준을 계산합니다.</p>
+        <div class="profit-form">
+          <div class="field">
+            <label for="entryPriceInput" data-i18n="entryPrice">기준 진입가</label>
+            <input id="entryPriceInput" type="number" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="field">
+            <label for="strategyMode" data-i18n="strategyMode">전략 모드</label>
+            <select id="strategyMode">
+              <option value="conservative">보수적</option>
+              <option value="balanced">균형</option>
+              <option value="aggressive">공격적</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="maxPositionInput" data-i18n="maxPosition">최대 비중</label>
+            <input id="maxPositionInput" type="number" min="1" max="100" step="1" value="25">
+          </div>
+        </div>
+        <div class="profit-stats">
+          <div class="stat"><div class="stat-label" data-i18n="currentPrice">현재가</div><div class="stat-value" id="profitCurrentPrice">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="unrealizedPnl">미실현 수익률</div><div class="stat-value" id="profitPnl">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="takeProfit1">1차 익절</div><div class="stat-value" id="takeProfitOne">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="takeProfit2">2차 익절</div><div class="stat-value" id="takeProfitTwo">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="trailingStop">추적 손절</div><div class="stat-value" id="trailingStop">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="invalidation">무효화 가격</div><div class="stat-value" id="invalidationLevel">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="localHigh">로컬 고점</div><div class="stat-value" id="localHighValue">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="positionLimit">최대 비중</div><div class="stat-value" id="positionLimit">--</div></div>
+          <div class="stat"><div class="stat-label" data-i18n="portfolioRisk">계좌 리스크</div><div class="stat-value" id="portfolioRisk">--</div></div>
+        </div>
+      </div>
+    </section>
+    <div class="section-heading">
+      <h2 data-i18n="scoreSectionTitle">시그널 점수</h2>
+      <button class="info-trigger dark" type="button" data-info-key="scoreInfo" aria-label="시그널 점수 설명">i</button>
+    </div>
+    <section class="score-grid" id="scoreGrid" aria-label="시그널 점수"></section>
+    <section class="decision-layout" aria-label="백테스트와 데이터 품질">
+      <div class="backtest-panel">
+        <div class="panel-eyebrow"><span data-i18n="backtestEyebrow">No-lookahead 백테스트</span><button class="info-trigger dark" type="button" data-info-key="backtestInfo" aria-label="백테스트 설명">i</button></div>
+        <h2 class="panel-title" id="backtestTitle">Score threshold vs buy-and-hold</h2>
+        <div class="profit-form">
+          <div class="field">
+            <label for="feeInput" data-i18n="feeBps">거래 비용 bps</label>
+            <input id="feeInput" type="number" min="0" step="1" value="20">
+          </div>
+          <div class="field">
+            <label for="slippageInput" data-i18n="slippageBps">슬리피지 bps</label>
+            <input id="slippageInput" type="number" min="0" step="1" value="10">
+          </div>
+          <div class="field">
+            <label data-i18n="backtestPeriod">검증 기간</label>
+            <input id="backtestPeriod" type="text" readonly value="--">
+          </div>
+        </div>
+        <div class="backtest-stats" id="backtestStats"></div>
+      </div>
+      <div class="quality-panel">
+        <div class="panel-eyebrow"><span data-i18n="qualityEyebrow">데이터 품질 / Staleness Guard</span><button class="info-trigger dark" type="button" data-info-key="qualityInfo" aria-label="데이터 품질 설명">i</button></div>
+        <h2 class="panel-title" id="qualityTitle">Loading source health</h2>
+        <div class="quality-grid" id="qualityGrid"></div>
+      </div>
+    </section>
+    <section class="journal-panel full-width-panel" aria-label="트레이딩 저널">
+      <div class="panel-eyebrow"><span data-i18n="journalEyebrow">트레이딩 저널</span><button class="info-trigger dark" type="button" data-info-key="journalInfo" aria-label="트레이딩 저널 설명">i</button></div>
+      <div class="profit-form">
+        <div class="field">
+          <label for="journalDecision" data-i18n="journalDecision">결정</label>
+          <select id="journalDecision">
+            <option value="buy">buy</option>
+            <option value="add">add</option>
+            <option value="hold">hold</option>
+            <option value="trim">trim</option>
+            <option value="exit">exit</option>
+            <option value="no trade">no trade</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="journalReviewDate" data-i18n="reviewDate">리뷰 날짜</label>
+          <input id="journalReviewDate" type="date">
+        </div>
+        <div class="field">
+          <label for="journalFilter" data-i18n="journalFilter">기록 필터</label>
+          <select id="journalFilter">
+            <option value="all">all</option>
+            <option value="buy">buy</option>
+            <option value="add">add</option>
+            <option value="hold">hold</option>
+            <option value="trim">trim</option>
+            <option value="exit">exit</option>
+            <option value="no trade">no trade</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="journalReason" data-i18n="journalReason">판단 근거</label>
+          <textarea id="journalReason"></textarea>
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="action-button" id="saveJournal" type="button" data-i18n="saveJournal">기록 저장</button>
+        <button class="action-button secondary" id="exportJournal" type="button" data-i18n="exportJournal">JSON 내보내기</button>
+        <button class="action-button secondary" id="exportJournalCsv" type="button" data-i18n="exportJournalCsv">CSV 내보내기</button>
+        <button class="action-button secondary" id="clearJournal" type="button" data-i18n="clearJournal">기록 비우기</button>
+      </div>
+      <ol class="journal-list" id="journalList"></ol>
+    </section>
+    <div class="section-heading">
+      <h2 data-i18n="summarySectionTitle">대시보드 요약</h2>
+      <button class="info-trigger dark" type="button" data-info-key="summaryInfo" aria-label="요약 설명">i</button>
+    </div>
+    <section class="summary" aria-label="대시보드 요약">
+      <div class="summary-item"><div class="summary-label" data-i18n="metricCandidates">후보 지표</div><div class="summary-value" id="summaryTotal">30</div></div>
+      <div class="summary-item"><div class="summary-label" data-i18n="workingNow">작동 중</div><div class="summary-value" id="summaryLive">0</div></div>
+      <div class="summary-item"><div class="summary-label" data-i18n="unavailable">사용 불가</div><div class="summary-value" id="summaryFailed">0</div></div>
+      <div class="summary-item"><div class="summary-label" data-i18n="sourcesChecked">확인한 소스</div><div class="summary-value">10</div></div>
+    </section>
+    <section class="intel" aria-label="RAG 기반 인사이트">
+      <div class="intel-head">
+        <div class="intel-eyebrow"><span data-i18n="intelEyebrow">RAG 인사이트</span><button class="info-trigger dark" type="button" data-info-key="ragInfo" aria-label="RAG 인사이트 설명">i</button></div>
+        <h2 class="intel-title" data-i18n="intelTitle">가격 밖의 핵심 질문</h2>
+        <p class="intel-text" data-i18n="intelIntro">커뮤니티 대시보드와 공개 API에서 반복되는 초점은 L2 사용량, blob 데이터 수요, 수수료/수익성, 보안 리스크입니다. 아래 지표와 링크는 이 관점으로 대시보드를 해석하게 만듭니다.</p>
+      </div>
+      <article class="intel-card">
+        <div class="intel-source">growthepie</div>
+        <h3 class="intel-title" data-i18n="intelUsageTitle">L2 사용량과 수익성</h3>
+        <p class="intel-text" data-i18n="intelUsageText">생태계 거래수, 활성주소, L2 온체인 수익, blob 사용량을 새 작동 지표로 추가했습니다.</p>
+        <a class="intel-link" href="https://www.growthepie.com/" target="_blank" rel="noreferrer" data-i18n="openSource">소스 열기</a>
+      </article>
+      <article class="intel-card">
+        <div class="intel-source">Ethereum Dashboards</div>
+        <h3 class="intel-title" data-i18n="intelCommunityTitle">커뮤니티 관찰 포인트</h3>
+        <p class="intel-text" data-i18n="intelCommunityText">blob, gas, MEV, staking, network health, L2 risk 대시보드가 반복적으로 공유됩니다. 기본 패널은 keyless 데이터만 직접 통합했습니다.</p>
+        <a class="intel-link" href="https://ethereumdashboards.com/" target="_blank" rel="noreferrer" data-i18n="openSource">소스 열기</a>
+      </article>
+      <article class="intel-card">
+        <div class="intel-source">Dune / L2BEAT</div>
+        <h3 class="intel-title" data-i18n="intelRiskTitle">다음 고도화 후보</h3>
+        <p class="intel-text" data-i18n="intelRiskText">Dune의 rollup economics와 L2BEAT risk 자료는 강력하지만 기본 로컬 HTML에는 키/스크래핑 없이 링크형 RAG 근거로 유지합니다.</p>
+        <a class="intel-link" href="https://l2beat.com/scaling/summary" target="_blank" rel="noreferrer" data-i18n="openSource">소스 열기</a>
+      </article>
+    </section>
+    <div class="section-heading">
+      <h2 data-i18n="metricExplorerTitle">지표 탐색</h2>
+      <button class="info-trigger dark" type="button" data-info-key="metricExplorerInfo" aria-label="지표 탐색 설명">i</button>
+    </div>
+    <nav class="toolbar" aria-label="지표 카테고리 필터" id="filters"></nav>
+    <section class="main-chart" aria-label="선택한 지표 차트">
+      <div class="chart-head">
+        <div>
+          <h2 class="chart-title" id="mainTitle" data-i18n="loadingMetrics">지표 로딩 중</h2>
+          <div class="chart-meta" id="mainDescription"></div>
+        </div>
+        <div class="chart-meta" id="mainMeta"></div>
+      </div>
+      <div class="chart-box" id="mainChart"></div>
+    </section>
+    <section class="grid" id="metricGrid" aria-label="지표 카드"></section>
+    <section class="status">
+      <div class="section-heading">
+        <h2 data-i18n="unavailableHeading">사용 불가 또는 키가 필요한 지표</h2>
+        <button class="info-trigger dark" type="button" data-info-key="unavailableInfo" aria-label="사용 불가 지표 설명">i</button>
+      </div>
+      <ol class="status-list" id="failedList"></ol>
+    </section>
+  </main>
+
+  <script>
+    const ENDPOINTS = {
+      cgEth: "https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=365&interval=daily",
+      cgBtc: "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365&interval=daily",
+      ethTvl: "https://api.llama.fi/v2/historicalChainTvl/Ethereum",
+      fees: "https://api.llama.fi/overview/fees/ethereum?excludeTotalDataChart=false",
+      dexs: "https://api.llama.fi/overview/dexs/Ethereum?excludeTotalDataChart=false&excludeTotalDataChartBreakdown=true",
+      stableChart: "https://stablecoins.llama.fi/stablecoincharts/Ethereum",
+      chains: "https://api.llama.fi/chains",
+      lido: "https://api.llama.fi/protocol/lido",
+      rocket: "https://api.llama.fi/protocol/rocket-pool",
+      aave: "https://api.llama.fi/protocol/aave-v3",
+      uniswap: "https://api.llama.fi/protocol/uniswap",
+      curve: "https://api.llama.fi/protocol/curve-dex",
+      lidoApy: "https://yields.llama.fi/chart/747c1d2a-c668-4682-b9f9-296708a3dd90",
+      rocketApy: "https://yields.llama.fi/chart/d4b3c522-6127-4b89-bedf-83641cdcd2eb",
+      growthepieFundamentals: "https://api.growthepie.com/v1/fundamentals.json",
+      binanceEthDaily: "https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&limit=450",
+      binanceBtcDaily: "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=450"
+    };
+
+    const LIVE_ENDPOINTS = {
+      ethTicker: "https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT"
+    };
+
+    const LIVE_POLL_MS = 15000;
+    const LIVE_CHART_MODES = ["line", "range", "candle"];
+    const LIVE_CHART_RANGES = {
+      "15m": { interval: "1m", limit: 15, titleKey: "liveChartTitle15m", scopeKey: "liveChartScope15m", labelKey: "chartRange15m" },
+      "1h": { interval: "1m", limit: 60, titleKey: "liveChartTitle1h", scopeKey: "liveChartScope1h", labelKey: "chartRange1h" },
+      "4h": { interval: "5m", limit: 48, titleKey: "liveChartTitle4h", scopeKey: "liveChartScope4h", labelKey: "chartRange4h" },
+      "24h": { interval: "15m", limit: 96, titleKey: "liveChartTitle24h", scopeKey: "liveChartScope24h", labelKey: "chartRange24h" }
+    };
+    const LOWER_IS_BETTER_METRICS = new Set(["eth_volatility", "eth_drawdown"]);
+
+    const cache = new Map();
+    const categories = ["All", "Price/Market", "On-chain Activity", "Network Economics", "DeFi / Stablecoin / L2", "L2 Adoption / Blob Demand", "Validation / Security / Staking"];
+    let activeCategory = "All";
+    let selectedId = null;
+    let results = [];
+    let liveState = {
+      status: "loading",
+      ticker: null,
+      series: [],
+      updatedAt: null,
+      error: ""
+    };
+    let livePollHandle = null;
+    let currentLanguage = getStoredLanguage();
+    let currentTheme = getStoredTheme();
+    let liveChartMode = loadLiveChartMode();
+    let liveChartRange = loadLiveChartRange();
+    let scoreState = null;
+    let backtestState = null;
+    let backtestRows = [];
+    let profitSettings = loadProfitSettings();
+    let journalEntries = loadJournalEntries();
+
+    const STRATEGY_MODES = {
+      conservative: { tp1: 0.08, tp2: 0.15, trail: 0.05, maxDrawdown: 0.06 },
+      balanced: { tp1: 0.12, tp2: 0.25, trail: 0.08, maxDrawdown: 0.10 },
+      aggressive: { tp1: 0.20, tp2: 0.40, trail: 0.12, maxDrawdown: 0.15 }
+    };
+
+    const translations = {
+      ko: {
+        title: "이더리움 펀더멘털 대시보드",
+        heroTitle: "이더리움 펀더멘털",
+        subtitle: "가치평가, 사용량, 네트워크 경제성, DeFi 유동성, L2 확장, 스테이킹 신호를 한 화면에서 봅니다. 이 화면은 로컬 파일에서 검증된 무키 공개 API 지표만 사용합니다.",
+        loadingDataSources: "데이터 소스 로딩 중...",
+        localFileNote: "로컬 HTML 파일로 바로 열 수 있습니다. 빌드 단계가 필요 없습니다.",
+        themeLight: "라이트",
+        themeDark: "다크",
+        switchToLight: "라이트 모드로 전환",
+        switchToDark: "다크 모드로 전환",
+        liveMarket: "실시간 시장",
+        liveSymbol: "Binance 현물 ETH/USDT",
+        changePending: "24시간 변동률 대기 중",
+        changePrefix: "24시간",
+        quoteVolume: "거래대금",
+        high24h: "고가",
+        low24h: "저가",
+        range24hValue: "변동폭",
+        recentRefreshInline: "최근 갱신",
+        liveStatsScope: "통계: 최근 24시간",
+        chartReadHint: "마우스를 올리면 시각과 가격을 확인할 수 있습니다.",
+        chartModeLabel: "차트 보기 방식",
+        chartModeLine: "라인",
+        chartModeRange: "범위",
+        chartModeCandle: "캔들",
+        chartRangeLabel: "차트 시간 범위",
+        chartRange15m: "15분",
+        chartRange1h: "1시간",
+        chartRange4h: "4시간",
+        chartRange24h: "24시간",
+        refreshCadence: "15초 갱신",
+        sixtyMinuteClose: "최근 1시간 가격",
+        liveChartScope: "1분 단위",
+        liveChartTitle15m: "최근 15분 가격",
+        liveChartTitle1h: "최근 1시간 가격",
+        liveChartTitle4h: "최근 4시간 가격",
+        liveChartTitle24h: "최근 24시간 가격",
+        liveChartScope15m: "그래프: 최근 15분 · 1분 단위",
+        liveChartScope1h: "그래프: 최근 60분 · 1분 단위",
+        liveChartScope4h: "그래프: 최근 4시간 · 5분 단위",
+        liveChartScope24h: "그래프: 최근 24시간 · 15분 단위",
+        oneMinuteCandles: "마우스를 올리면 시각과 가격을 확인할 수 있습니다.",
+        oneMinuteCloses: "1분 단위 가격",
+        range24h: "24시간 범위에서 현재가 위치",
+        rangeLow: "저가",
+        rangeCurrent: "현재가",
+        rangeHigh: "고가",
+        metricCandidates: "후보 지표",
+        workingNow: "작동 중",
+        unavailable: "사용 불가",
+        sourcesChecked: "확인한 소스",
+        summarySectionTitle: "대시보드 요약",
+        loadingMetrics: "지표 로딩 중",
+        scoreSectionTitle: "시그널 점수",
+        metricExplorerTitle: "지표 탐색",
+        unavailableHeading: "사용 불가 또는 키가 필요한 지표",
+        decisionEyebrow: "의사결정 대시보드",
+        confidence: "판단 강도",
+        decisionStrengthNote: "판단 강도는 수익 확률이 아니라 시장/펀더멘털/유동성/L2/리스크 조건이 얼마나 같은 방향으로 맞는지 보여줍니다.",
+        supportingEvidence: "주요 근거",
+        riskEvidence: "주요 리스크",
+        profitEyebrow: "수익 실현 패널",
+        entryPrice: "기준 진입가",
+        strategyMode: "전략 모드",
+        maxPosition: "최대 비중",
+        currentPrice: "현재가",
+        unrealizedPnl: "미실현 수익률",
+        takeProfit1: "1차 익절",
+        takeProfit2: "2차 익절",
+        trailingStop: "추적 손절",
+        invalidation: "무효화 가격",
+        localHigh: "로컬 고점",
+        positionLimit: "최대 비중",
+        portfolioRisk: "계좌 리스크",
+        conservativeMode: "보수적",
+        balancedMode: "균형",
+        aggressiveMode: "공격적",
+        backtestEyebrow: "No-lookahead 백테스트",
+        feeBps: "거래 비용 bps",
+        slippageBps: "슬리피지 bps",
+        backtestPeriod: "검증 기간",
+        qualityEyebrow: "데이터 품질 / Staleness Guard",
+        journalEyebrow: "트레이딩 저널",
+        journalDecision: "결정",
+        journalFilter: "기록 필터",
+        reviewDate: "리뷰 날짜",
+        journalReason: "판단 근거",
+        saveJournal: "기록 저장",
+        exportJournal: "JSON 내보내기",
+        exportJournalCsv: "CSV 내보내기",
+        clearJournal: "기록 비우기",
+        sinceDecision: "기록 후 수익률",
+        noData: "데이터 없음",
+        noEdge: "No Edge",
+        riskOff: "Risk-Off",
+        confirmedStrength: "Confirmed Strength",
+        fragileRally: "Fragile Rally",
+        accumulationWatch: "Accumulation Watch",
+        constructive: "Constructive / 분할 진입 또는 보유",
+        reduceExposure: "Risk-off / 비중 축소 검토",
+        avoidChase: "Fragile rally / 추격 매수 주의",
+        waitConfirmation: "Accumulation watch / 확인 후 분할 진입 후보",
+        noTradeHint: "No edge / 신호 충돌 또는 데이터 품질 문제로 거래 보류",
+        entryRequiredHint: "진입가 입력 필요",
+        entryRequiredNote: "수익 실현 패널은 기존 포지션 관리용입니다. 기준 진입가를 입력해야 익절, 무효화, trailing stop을 계산합니다.",
+        preEntryConstructiveNote: "현재 국면은 긍정적이지만, 아직 포지션 관리 기준이 없습니다. 분할 진입을 검토하려면 기준 진입가와 최대 비중을 먼저 정하세요.",
+        activePositionNote: "기준 진입가를 바탕으로 현재 수익률, 익절가, 무효화 가격을 계산합니다.",
+        holdHint: "Hold / 기존 포지션 유지 후보",
+        trimHint: "Trim / 일부 수익 실현 후보",
+        exitHint: "Exit / 무효화 또는 리스크 조건 충족",
+        addHint: "Add / 근거가 강한 분할 추가 후보",
+        sourceFresh: "정상",
+        sourceStale: "지연",
+        sourceFailed: "실패",
+        livePriceSource: "실시간 가격",
+        coreFundamentalsSource: "핵심 펀더멘털",
+        l2Source: "L2 / Blob",
+        backtestStrategy: "전략",
+        buyHold: "Buy & Hold",
+        totalReturn: "총 수익률",
+        annualizedReturn: "연환산",
+        maxDrawdown: "최대 낙폭",
+        winRate: "승률",
+        trades: "거래 수",
+        timeInMarket: "시장 노출",
+        profitFactor: "손익비",
+        avgTrade: "평균 거래",
+        worstTrade: "최악 거래",
+        sharpeLike: "Sharpe 유사",
+        outSample: "최근 90일 OOS",
+        testWindowNote: "일간 지표는 다음 날 신호에만 반영해 look-ahead를 방지합니다.",
+        riskDisclaimer: "투자 조언이 아닙니다. 백테스트와 리스크 한도 안에서만 참고하세요.",
+        intelEyebrow: "RAG 인사이트",
+        intelTitle: "가격 밖의 핵심 질문",
+        intelIntro: "커뮤니티 대시보드와 공개 API에서 반복되는 초점은 L2 사용량, blob 데이터 수요, 수수료/수익성, 보안 리스크입니다. 아래 지표와 링크는 이 관점으로 대시보드를 해석하게 만듭니다.",
+        intelUsageTitle: "L2 사용량과 수익성",
+        intelUsageText: "생태계 거래수, 활성주소, L2 온체인 수익, blob 사용량을 새 작동 지표로 추가했습니다.",
+        intelCommunityTitle: "커뮤니티 관찰 포인트",
+        intelCommunityText: "blob, gas, MEV, staking, network health, L2 risk 대시보드가 반복적으로 공유됩니다. 기본 패널은 keyless 데이터만 직접 통합했습니다.",
+        intelRiskTitle: "다음 고도화 후보",
+        intelRiskText: "Dune의 rollup economics와 L2BEAT risk 자료는 강력하지만 기본 로컬 HTML에는 키/스크래핑 없이 링크형 RAG 근거로 유지합니다.",
+        openSource: "소스 열기",
+        waitingForSource: "소스 대기 중",
+        changeUnavailable: "24시간 변동률 없음",
+        sourceUnavailable: "소스 사용 불가",
+        fetchingLive: "실시간 시장 데이터 가져오는 중...",
+        failedPrefix: "실패",
+        stalePrefix: "지연",
+        keepingPrevious: "마지막 성공 값을 유지합니다.",
+        liveSourceMessage: "Binance 가격 {seconds}초 갱신",
+        liveSourceCompact: "Binance 가격 {seconds}초 갱신",
+        goodSignal: "좋은 신호",
+        cautionSignal: "주의 신호",
+        currentRead: "현재 해석",
+        higherBetter: "값과 추세가 함께 오를 때",
+        lowerBetter: "값이 낮아지거나 안정될 때",
+        higherWarning: "값이 급히 오르거나 높은 상태",
+        lowerWarning: "값과 추세가 함께 약해질 때",
+        improvingNow: "최근 흐름은 개선 중입니다.",
+        weakeningNow: "최근 흐름은 약해지고 있습니다.",
+        flatNow: "최근 흐름은 큰 변화가 없습니다.",
+        trendUnknown: "추세 판단에는 데이터가 더 필요합니다.",
+        lastLoaded: "마지막 로딩",
+        liveBadge: "실시간",
+        staleBadge: "지연",
+        failedBadge: "실패",
+        loadingBadge: "로딩",
+        unavailableBadge: "사용 불가",
+        notAvailableShort: "없음",
+        oneDay: "1일",
+        sevenDays: "7일",
+        all: "전체",
+        categories: {
+          "All": "전체",
+          "Price/Market": "가격/시장",
+          "On-chain Activity": "온체인 활동",
+          "Network Economics": "네트워크 경제성",
+          "DeFi / Stablecoin / L2": "DeFi / 스테이블코인 / L2",
+          "L2 Adoption / Blob Demand": "L2 채택 / Blob 수요",
+          "Validation / Security / Staking": "검증 / 보안 / 스테이킹"
+        },
+        metrics: {
+          eth_price: { name: "ETH 가격", why: "ETH 가치평가의 기본 시장 신호이며 네트워크 비율 계산의 기준값입니다." },
+          eth_mcap: { name: "ETH 시가총액", why: "수수료, 유동성, 활동량을 정규화하는 네트워크 가치 대용 지표입니다." },
+          eth_volume: { name: "ETH 현물 거래량", why: "ETH 주변의 시장 유동성과 단기 참여도를 보여줍니다." },
+          eth_volatility: { name: "30일 실현 변동성", why: "가치평가, 담보 할인율, 포지션 크기 산정에 쓰이는 위험 입력값입니다." },
+          eth_btc: { name: "ETH / BTC 비율", why: "주요 크립토 준비자산인 비트코인 대비 ETH의 상대 강도입니다." },
+          eth_drawdown: { name: "ETH 90일 낙폭", why: "최근 고점 대비 ETH가 얼마나 낮게 거래되는지 측정합니다." },
+          ethereum_fees: { name: "이더리움 일일 수수료", why: "이더리움 블록공간 수요를 직접 보여주는 신호입니다." },
+          ethereum_tvl: { name: "이더리움 DeFi TVL", why: "이더리움 DeFi 애플리케이션에 예치된 자본 규모입니다." },
+          eth_dex_volume: { name: "이더리움 DEX 거래량", why: "온체인 거래 수요와 거래소 유틸리티의 대용 지표입니다." },
+          uniswap_tvl: { name: "Uniswap 이더리움 TVL", why: "이더리움 최대 DEX 계열의 유동성 깊이입니다." },
+          curve_tvl: { name: "Curve 이더리움 TVL", why: "스테이블코인과 스테이킹 토큰 라우팅에 중요한 스테이블스왑 유동성입니다." },
+          aave_tvl: { name: "Aave V3 이더리움 TVL", why: "이더리움 대출시장의 담보 기반과 신용시장 깊이를 보여줍니다." },
+          fee_mcap: { name: "수수료 / 시가총액", why: "이더리움 블록공간의 매출 수익률형 가치평가 비율입니다." },
+          fees_tvl: { name: "수수료 / DeFi TVL", why: "이더리움에 잠긴 자본 대비 수수료 생산성을 보여줍니다." },
+          dex_tvl: { name: "DEX 거래량 / TVL", why: "이더리움 DeFi 유동성의 자본 효율성을 보여줍니다." },
+          stable_tvl: { name: "스테이블코인 / TVL", why: "달러 연동 결제 자산이 이더리움 DeFi 유동성에서 차지하는 비중입니다." },
+          lido_apy: { name: "Lido stETH APY", why: "ETH 보유자와 DeFi 담보의 기준 스테이킹 수익률입니다." },
+          rocket_apy: { name: "Rocket Pool rETH APY", why: "탈중앙 유동 스테이킹 수익률 비교 지표입니다." },
+          stable_supply: { name: "이더리움 스테이블코인 공급", why: "결제, 담보, DeFi 활동에 사용할 수 있는 달러 유동성입니다." },
+          base_tvl: { name: "Base TVL", why: "최근 DeFi 유동성 기준 가장 큰 이더리움 계열 L2입니다." },
+          arbitrum_tvl: { name: "Arbitrum TVL", why: "주요 옵티미스틱 롤업의 유동성 기반입니다." },
+          optimism_tvl: { name: "OP Mainnet TVL", why: "OP Stack 유동성과 애플리케이션 수요의 대용 지표입니다." },
+          l2_aggregate_tvl: { name: "핵심 L2 합산 TVL", why: "주요 이더리움 확장 네트워크의 유동성을 합산한 지표입니다." },
+          ecosystem_txcount: { name: "생태계 일일 거래수", why: "이더리움 메인넷과 주요 L2에서 발생한 실제 사용량을 합산해 확장 수요를 보여줍니다." },
+          ecosystem_daa: { name: "생태계 일일 활성주소", why: "L1과 L2를 합친 사용자 활동 범위를 보여주는 채택 지표입니다." },
+          l2_profit: { name: "L2 온체인 수익", why: "L2가 사용자 수수료에서 정산 및 데이터 가용성 비용을 뺀 뒤 남기는 온체인 수익입니다." },
+          blob_data_posted: { name: "Blob 데이터 게시량", why: "롤업이 이더리움 blob 공간을 얼마나 사용하는지 보여주는 데이터 가용성 수요 지표입니다." },
+          lido_tvl: { name: "Lido 이더리움 TVL", why: "가장 큰 스테이킹 프로토콜이 관리하는 유동 스테이킹 자본입니다." },
+          rocket_tvl: { name: "Rocket Pool 이더리움 TVL", why: "탈중앙 유동 스테이킹 자본 기반입니다." },
+          lido_eth_proxy: { name: "Lido 스테이킹 ETH 추정치", why: "Lido 이더리움 TVL을 ETH 가격으로 나누어 stETH 노출량을 근사합니다." }
+        }
+      },
+      en: {
+        title: "Ethereum Fundamentals Dashboard",
+        heroTitle: "Ethereum Fundamentals",
+        subtitle: "Valuation, usage, network economics, DeFi liquidity, L2 scaling, and staking signals. This working view uses only keyless public API metrics that were verified for local-file fetching.",
+        loadingDataSources: "Loading data sources...",
+        localFileNote: "Open as a local HTML file. No build step required.",
+        themeLight: "Light",
+        themeDark: "Dark",
+        switchToLight: "Switch to light mode",
+        switchToDark: "Switch to dark mode",
+        liveMarket: "Live Market",
+        liveSymbol: "ETH/USDT on Binance spot",
+        changePending: "24h change pending",
+        changePrefix: "24h",
+        quoteVolume: "Traded value",
+        high24h: "High",
+        low24h: "Low",
+        range24hValue: "Range",
+        recentRefreshInline: "Last refresh",
+        liveStatsScope: "Stats: last 24 hours",
+        chartReadHint: "Hover to inspect time and price.",
+        chartModeLabel: "Chart view mode",
+        chartModeLine: "Line",
+        chartModeRange: "Range",
+        chartModeCandle: "Candle",
+        chartRangeLabel: "Chart time range",
+        chartRange15m: "15m",
+        chartRange1h: "1h",
+        chartRange4h: "4h",
+        chartRange24h: "24h",
+        refreshCadence: "15s refresh",
+        sixtyMinuteClose: "Last 1 hour price",
+        liveChartScope: "1-minute intervals",
+        liveChartTitle15m: "Last 15 minutes price",
+        liveChartTitle1h: "Last 1 hour price",
+        liveChartTitle4h: "Last 4 hours price",
+        liveChartTitle24h: "Last 24 hours price",
+        liveChartScope15m: "Chart: last 15 minutes · 1-minute intervals",
+        liveChartScope1h: "Chart: last 60 minutes · 1-minute intervals",
+        liveChartScope4h: "Chart: last 4 hours · 5-minute intervals",
+        liveChartScope24h: "Chart: last 24 hours · 15-minute intervals",
+        oneMinuteCandles: "Hover to inspect time and price.",
+        oneMinuteCloses: "one-minute prices",
+        range24h: "Current price inside the 24h range",
+        rangeLow: "low",
+        rangeCurrent: "current",
+        rangeHigh: "high",
+        metricCandidates: "Metric candidates",
+        workingNow: "Working now",
+        unavailable: "Unavailable",
+        sourcesChecked: "Sources checked",
+        summarySectionTitle: "Dashboard Summary",
+        loadingMetrics: "Loading metrics",
+        scoreSectionTitle: "Signal Scores",
+        metricExplorerTitle: "Metric Explorer",
+        unavailableHeading: "Unavailable Or Key-Gated Metrics",
+        decisionEyebrow: "Decision Dashboard",
+        confidence: "Signal strength",
+        decisionStrengthNote: "Signal strength is not a profit probability. It shows how well market, fundamental, liquidity, L2, and risk conditions align.",
+        supportingEvidence: "Supporting evidence",
+        riskEvidence: "Risk evidence",
+        profitEyebrow: "Profit Realization",
+        entryPrice: "Entry price",
+        strategyMode: "Strategy mode",
+        maxPosition: "Max position",
+        currentPrice: "Current price",
+        unrealizedPnl: "Unrealized PnL",
+        takeProfit1: "Take-profit 1",
+        takeProfit2: "Take-profit 2",
+        trailingStop: "Trailing stop",
+        invalidation: "Invalidation",
+        localHigh: "Local high",
+        positionLimit: "Max position",
+        portfolioRisk: "Account risk",
+        conservativeMode: "Conservative",
+        balancedMode: "Balanced",
+        aggressiveMode: "Aggressive",
+        backtestEyebrow: "No-lookahead Backtest",
+        feeBps: "Fee bps",
+        slippageBps: "Slippage bps",
+        backtestPeriod: "Test period",
+        qualityEyebrow: "Data Quality / Staleness Guard",
+        journalEyebrow: "Trading Journal",
+        journalDecision: "Decision",
+        journalFilter: "Journal filter",
+        reviewDate: "Review date",
+        journalReason: "Reason",
+        saveJournal: "Save note",
+        exportJournal: "Export JSON",
+        exportJournalCsv: "Export CSV",
+        clearJournal: "Clear journal",
+        sinceDecision: "Return since note",
+        noData: "No data",
+        noEdge: "No Edge",
+        riskOff: "Risk-Off",
+        confirmedStrength: "Confirmed Strength",
+        fragileRally: "Fragile Rally",
+        accumulationWatch: "Accumulation Watch",
+        constructive: "Constructive / hold or staged entry",
+        reduceExposure: "Risk-off / reduce exposure",
+        avoidChase: "Fragile rally / avoid chase",
+        waitConfirmation: "Accumulation watch / wait for confirmation",
+        noTradeHint: "No edge / conflicting signals or source quality issue",
+        entryRequiredHint: "Entry price required",
+        entryRequiredNote: "This panel manages an existing position. Enter a reference entry price to calculate take-profit, invalidation, and trailing stop levels.",
+        preEntryConstructiveNote: "The current regime is constructive, but position-management levels are not set yet. Define entry price and max position before acting.",
+        activePositionNote: "Levels are calculated from your reference entry price, current price, and selected strategy mode.",
+        holdHint: "Hold / existing position candidate",
+        trimHint: "Trim / partial profit-taking candidate",
+        exitHint: "Exit / invalidation or risk condition met",
+        addHint: "Add / staged add candidate with strong evidence",
+        sourceFresh: "fresh",
+        sourceStale: "stale",
+        sourceFailed: "failed",
+        livePriceSource: "Live price",
+        coreFundamentalsSource: "Core fundamentals",
+        l2Source: "L2 / Blob",
+        backtestStrategy: "Strategy",
+        buyHold: "Buy & Hold",
+        totalReturn: "Total return",
+        annualizedReturn: "Annualized",
+        maxDrawdown: "Max drawdown",
+        winRate: "Win rate",
+        trades: "Trades",
+        timeInMarket: "Time in market",
+        profitFactor: "Profit factor",
+        avgTrade: "Avg trade",
+        worstTrade: "Worst trade",
+        sharpeLike: "Sharpe-like",
+        outSample: "Last 90D OOS",
+        testWindowNote: "Daily metrics are applied only to the next day to avoid look-ahead.",
+        riskDisclaimer: "Not investment advice. Use only within tested rules and your risk limits.",
+        intelEyebrow: "RAG Insights",
+        intelTitle: "The key questions beyond price",
+        intelIntro: "Community dashboards and public APIs repeatedly focus on L2 usage, blob data demand, fees/profitability, and security risk. The new metrics and links make the dashboard readable through that lens.",
+        intelUsageTitle: "L2 usage and profitability",
+        intelUsageText: "Added working metrics for ecosystem transactions, active addresses, L2 onchain profit, and blob data posted.",
+        intelCommunityTitle: "Community watchpoints",
+        intelCommunityText: "Blob, gas, MEV, staking, network health, and L2 risk dashboards are repeatedly shared. The default panel directly integrates only keyless data.",
+        intelRiskTitle: "Next upgrade candidates",
+        intelRiskText: "Dune rollup economics and L2BEAT risk data are high-value, but stay as linked RAG evidence in the local HTML unless keys or a backend are allowed.",
+        openSource: "Open source",
+        waitingForSource: "Waiting for source",
+        changeUnavailable: "24h change unavailable",
+        sourceUnavailable: "source unavailable",
+        fetchingLive: "Fetching live market data...",
+        failedPrefix: "Failed",
+        stalePrefix: "Stale",
+        keepingPrevious: "keeping last successful values.",
+        liveSourceMessage: "Binance price refreshes every {seconds}s",
+        liveSourceCompact: "Binance price refreshes every {seconds}s",
+        goodSignal: "Good signal",
+        cautionSignal: "Watch out",
+        currentRead: "Current read",
+        higherBetter: "value and trend rise together",
+        lowerBetter: "value falls or stabilizes",
+        higherWarning: "value spikes or stays elevated",
+        lowerWarning: "value and trend weaken together",
+        improvingNow: "Recent trend is improving.",
+        weakeningNow: "Recent trend is weakening.",
+        flatNow: "Recent trend is mostly flat.",
+        trendUnknown: "More data is needed for trend reading.",
+        lastLoaded: "Last loaded",
+        liveBadge: "live",
+        staleBadge: "stale",
+        failedBadge: "failed",
+        loadingBadge: "loading",
+        unavailableBadge: "unavailable",
+        notAvailableShort: "n/a",
+        oneDay: "1D",
+        sevenDays: "7D",
+        all: "All",
+        categories: {},
+        metrics: {}
+      }
+    };
+
+    const infoContent = {
+      ko: {
+        liveMarketInfo: {
+          title: "실시간 시장",
+          body: "지금 ETH 가격 분위기를 보는 곳입니다.\n상단 3열은 현재가, 최근 24시간 통계, 24시간 범위와 데이터 상태를 요약합니다.\n아래 전체 폭 차트는 최근 60분 가격 흐름을 읽는 영역입니다. 단기 타이밍 참고용이지, 이것만 보고 매수/매도하지 않습니다."
+        },
+        decisionInfo: {
+          title: "의사결정 대시보드",
+          body: "초보자는 여기부터 보면 됩니다.\n현재 국면은 시장 상태 요약이고, action hint는 지금 할 행동 후보입니다.\n주요 근거와 주요 리스크가 동시에 표시되므로 한쪽만 보고 판단하지 않게 도와줍니다."
+        },
+        profitInfo: {
+          title: "수익 실현 패널",
+          body: "내 진입가를 기준으로 어디서 익절하거나 판단을 무효화할지 계산합니다.\n1차/2차 익절은 수익을 나눠 실현할 가격이고, trailing stop은 오른 뒤 되돌림에서 수익을 보호하는 기준입니다.\n무효화 가격은 내 판단이 틀렸다고 볼 가격입니다."
+        },
+        scoreInfo: {
+          title: "시그널 점수",
+          body: "복잡한 지표를 5개 점수로 압축합니다.\nMarket/Fundamental/Liquidity/L2 점수는 높을수록 좋고, Risk 점수는 높을수록 나쁩니다.\n가장 좋은 상태는 앞의 4개가 높고 Risk가 낮은 조합입니다."
+        },
+        backtestInfo: {
+          title: "No-lookahead 백테스트",
+          body: "현재 규칙을 과거에 적용했다면 어땠는지 확인합니다.\n전일 신호만 다음 날 수익률에 적용해 미래 데이터를 미리 보는 오류를 줄입니다.\n전략 수익률이 Buy & Hold보다 나은지, 최대 낙폭이 감당 가능한지 먼저 봅니다."
+        },
+        qualityInfo: {
+          title: "데이터 품질",
+          body: "수익 판단에 쓰는 데이터가 정상인지 확인합니다.\n중요 소스가 실패하거나 오래된 상태면 대시보드는 신규 진입 신호를 No Edge로 무효화합니다.\n가격은 살아 있어도 펀더멘털 데이터가 죽어 있으면 판단을 보류하는 영역입니다."
+        },
+        journalInfo: {
+          title: "트레이딩 저널",
+          body: "왜 매수/보유/축소/청산을 생각했는지 기록하는 곳입니다.\n나중에 같은 조건에서 결과가 좋았는지 검토할 수 있습니다.\nJSON/CSV로 내보내서 별도로 분석할 수 있습니다."
+        },
+        summaryInfo: {
+          title: "대시보드 요약",
+          body: "현재 로딩된 지표 수와 사용 불가 지표 수를 보여줍니다.\n작동 중 지표가 줄거나 사용 불가가 늘면 판단 신뢰도가 낮아집니다.\n여기는 투자 판단보다 데이터 상태 확인용입니다."
+        },
+        ragInfo: {
+          title: "RAG 인사이트",
+          body: "커뮤니티에서 자주 보는 Ethereum 관찰 포인트를 요약합니다.\nL2 사용량, blob 수요, rollup economics, MEV, staking, L2 risk 같은 맥락을 제공합니다.\n숫자 지표가 왜 중요한지 배경을 이해하는 영역입니다."
+        },
+        metricExplorerInfo: {
+          title: "지표 탐색",
+          body: "개별 차트는 결론을 찾는 곳이 아니라 근거를 확인하는 곳입니다.\n먼저 Decision Dashboard와 점수를 보고, 왜 그런 판단이 나왔는지 궁금할 때 관련 지표를 눌러 확인합니다.\n예: L2 점수가 약하면 L2 거래수, 활성주소, blob 지표를 봅니다."
+        },
+        unavailableInfo: {
+          title: "사용 불가 지표",
+          body: "API key가 필요하거나 로컬 파일에서 안정적으로 불러올 수 없는 지표입니다.\n여기에 항목이 있으면 일부 분석은 제외되었다는 뜻입니다.\n중요 지표가 계속 실패하면 대시보드의 action hint는 보수적으로 해석해야 합니다."
+        }
+      },
+      en: {
+        liveMarketInfo: {
+          title: "Live Market",
+          body: "Use this to read the immediate ETH market tone.\nThe top three columns summarize current price, 24h stats, and 24h range/data status.\nThe full-width chart below is for reading the last 60 minutes of price movement. It is timing context, not a standalone buy/sell signal."
+        },
+        decisionInfo: {
+          title: "Decision Dashboard",
+          body: "Start here if you are new.\nThe regime summarizes the market state, and the action hint gives the current candidate stance.\nSupport and risk evidence are shown together so you do not rely on one side only."
+        },
+        profitInfo: {
+          title: "Profit Realization",
+          body: "This turns your entry price into take-profit and invalidation levels.\nTake-profit 1/2 are staged exits, trailing stop protects gains after a move, and invalidation is the price where your thesis is considered wrong."
+        },
+        scoreInfo: {
+          title: "Signal Scores",
+          body: "This compresses many metrics into five scores.\nMarket/Fundamental/Liquidity/L2 are better when higher. Risk is worse when higher.\nThe best setup is strong first four scores with low Risk."
+        },
+        backtestInfo: {
+          title: "No-lookahead Backtest",
+          body: "This checks how the rule behaved historically.\nOnly yesterday's signal is applied to today's return to reduce look-ahead bias.\nFirst compare strategy return, buy-and-hold, and max drawdown."
+        },
+        qualityInfo: {
+          title: "Data Quality",
+          body: "This checks whether decision-critical data is fresh.\nIf a critical source is stale or failed, new entry signals are disabled as No Edge.\nEven if price works, stale fundamentals should pause decision making."
+        },
+        journalInfo: {
+          title: "Trading Journal",
+          body: "Use this to record why you considered buy/hold/trim/exit.\nLater you can review whether similar conditions worked.\nExport JSON/CSV for external analysis."
+        },
+        summaryInfo: {
+          title: "Dashboard Summary",
+          body: "Shows how many metrics are loaded and how many are unavailable.\nIf working metrics fall or unavailable metrics rise, confidence drops.\nThis is data health context, not an investment signal."
+        },
+        ragInfo: {
+          title: "RAG Insights",
+          body: "Summarizes Ethereum topics often watched by the community.\nIt gives context around L2 usage, blob demand, rollup economics, MEV, staking, and L2 risk.\nUse this to understand why the numeric metrics matter."
+        },
+        metricExplorerInfo: {
+          title: "Metric Explorer",
+          body: "Individual charts are for checking evidence, not finding the first answer.\nStart with the Decision Dashboard and scores, then inspect the metrics that explain them.\nExample: if L2 score is weak, inspect L2 tx, active addresses, and blob metrics."
+        },
+        unavailableInfo: {
+          title: "Unavailable Metrics",
+          body: "These require keys or are not reliable from a local HTML file.\nItems here mean part of the desired analysis is excluded.\nIf important sources keep failing, interpret action hints conservatively."
+        }
+      }
+    };
+
+    function getStoredLanguage() {
+      try {
+        return localStorage.getItem("ethDashboardLanguage") === "en" ? "en" : "ko";
+      } catch (error) {
+        return "ko";
+      }
+    }
+
+    function storeLanguage(language) {
+      try {
+        localStorage.setItem("ethDashboardLanguage", language);
+      } catch (error) {
+        // Local storage can be unavailable in hardened file contexts.
+      }
+    }
+
+    function getStoredTheme() {
+      try {
+        return localStorage.getItem("ethDashboardTheme") === "dark" ? "dark" : "light";
+      } catch (error) {
+        return "light";
+      }
+    }
+
+    function storeTheme(theme) {
+      try {
+        localStorage.setItem("ethDashboardTheme", theme);
+      } catch (error) {
+        // Local storage can be unavailable in hardened file contexts.
+      }
+    }
+
+    function loadLiveChartMode() {
+      try {
+        const stored = localStorage.getItem("ethLiveChartMode");
+        if (LIVE_CHART_MODES.includes(stored)) return stored;
+        return localStorage.getItem("ethLiveRangeBand") === "off" ? "line" : "range";
+      } catch (error) {
+        return "range";
+      }
+    }
+
+    function storeLiveChartMode(value) {
+      try {
+        localStorage.setItem("ethLiveChartMode", LIVE_CHART_MODES.includes(value) ? value : "range");
+      } catch (error) {
+        // Local storage can be unavailable in hardened file contexts.
+      }
+    }
+
+    function loadLiveChartRange() {
+      try {
+        const stored = localStorage.getItem("ethLiveChartRange");
+        return LIVE_CHART_RANGES[stored] ? stored : "1h";
+      } catch (error) {
+        return "1h";
+      }
+    }
+
+    function storeLiveChartRange(value) {
+      try {
+        localStorage.setItem("ethLiveChartRange", LIVE_CHART_RANGES[value] ? value : "1h");
+      } catch (error) {
+        // Local storage can be unavailable in hardened file contexts.
+      }
+    }
+
+    function liveKlineUrl() {
+      const config = LIVE_CHART_RANGES[liveChartRange] || LIVE_CHART_RANGES["1h"];
+      return `https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=${config.interval}&limit=${config.limit}`;
+    }
+
+    function t(key) {
+      return translations[currentLanguage][key] || translations.en[key] || key;
+    }
+
+    function categoryLabel(category) {
+      return translations[currentLanguage].categories[category] || category;
+    }
+
+    function metricName(metric) {
+      return translations[currentLanguage].metrics[metric.id]?.name || metric.name;
+    }
+
+    function metricWhy(metric) {
+      return translations[currentLanguage].metrics[metric.id]?.why || metric.why;
+    }
+
+    function metricReading(result, d1, d7) {
+      const lowerBetter = LOWER_IS_BETTER_METRICS.has(result.id);
+      const trend = Number.isFinite(d7) ? d7 : d1;
+      let current = t("trendUnknown");
+      if (Number.isFinite(trend)) {
+        if (Math.abs(trend) < 1) current = t("flatNow");
+        else {
+          const improving = lowerBetter ? trend < 0 : trend > 0;
+          current = improving ? t("improvingNow") : t("weakeningNow");
+        }
+      }
+      return `<div class="metric-read">
+        <span><strong>${t("goodSignal")}:</strong> ${lowerBetter ? t("lowerBetter") : t("higherBetter")}</span>
+        <span><strong>${t("cautionSignal")}:</strong> ${lowerBetter ? t("higherWarning") : t("lowerWarning")}</span>
+        <span><strong>${t("currentRead")}:</strong> ${current}</span>
+      </div>`;
+    }
+
+    function applyStaticTranslations() {
+      document.documentElement.lang = currentLanguage;
+      document.documentElement.dataset.theme = currentTheme;
+      document.title = t("title");
+      document.querySelectorAll("[data-i18n]").forEach(node => {
+        node.textContent = t(node.dataset.i18n);
+      });
+      updateStrategyModeLabels();
+      updateThemeToggle();
+      const toggle = document.getElementById("languageToggle");
+      toggle.textContent = currentLanguage === "ko" ? "EN" : "한";
+      toggle.setAttribute("aria-label", currentLanguage === "ko" ? "Switch to English" : "한국어로 전환");
+    }
+
+    function updateThemeToggle() {
+      const toggle = document.getElementById("themeToggle");
+      if (!toggle) return;
+      const isDark = currentTheme === "dark";
+      toggle.textContent = isDark ? t("themeLight") : t("themeDark");
+      toggle.classList.toggle("active", isDark);
+      toggle.setAttribute("aria-checked", isDark ? "true" : "false");
+      toggle.setAttribute("aria-label", isDark ? t("switchToLight") : t("switchToDark"));
+    }
+
+    function updateStrategyModeLabels() {
+      const select = document.getElementById("strategyMode");
+      if (!select) return;
+      const labels = {
+        conservative: t("conservativeMode"),
+        balanced: t("balancedMode"),
+        aggressive: t("aggressiveMode")
+      };
+      Array.from(select.options).forEach(option => {
+        option.textContent = labels[option.value] || option.value;
+      });
+    }
+
+    function rerenderLanguage() {
+      applyStaticTranslations();
+      updateLiveChartModeButtons();
+      updateLiveChartRangeButtons();
+      renderLiveMarket();
+      renderFilters();
+      if (selectedId) {
+        const selected = results.find(item => item.id === selectedId);
+        if (selected?.status === "live") renderMain(selected);
+      }
+      renderCards();
+      renderFailedList();
+      if (results.length) renderDecisionSuite();
+      if (results.length) {
+        document.getElementById("lastUpdated").textContent = `${t("lastLoaded")} ${new Date().toLocaleString(currentLanguage === "ko" ? "ko-KR" : "en-US")}`;
+      }
+    }
+
+    function initLanguageToggle() {
+      const toggle = document.getElementById("languageToggle");
+      toggle.addEventListener("click", () => {
+        currentLanguage = currentLanguage === "ko" ? "en" : "ko";
+        storeLanguage(currentLanguage);
+        rerenderLanguage();
+      });
+    }
+
+    function initThemeToggle() {
+      const toggle = document.getElementById("themeToggle");
+      if (!toggle) return;
+      toggle.addEventListener("click", () => {
+        currentTheme = currentTheme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = currentTheme;
+        storeTheme(currentTheme);
+        updateThemeToggle();
+        renderLiveMarket();
+        if (selectedId) {
+          const selected = results.find(item => item.id === selectedId);
+          if (selected?.status === "live") renderMain(selected);
+        }
+        renderCards();
+      });
+    }
+
+    function updateLiveChartModeButtons() {
+      const buttons = document.querySelectorAll("[data-chart-mode]");
+      buttons.forEach(button => {
+        const mode = button.dataset.chartMode;
+        button.textContent = t(`chartMode${mode.charAt(0).toUpperCase()}${mode.slice(1)}`);
+        button.classList.toggle("active", mode === liveChartMode);
+        button.setAttribute("aria-pressed", mode === liveChartMode ? "true" : "false");
+      });
+      const group = document.querySelector(".chart-mode-group");
+      if (group) group.setAttribute("aria-label", t("chartModeLabel"));
+    }
+
+    function updateLiveChartRangeButtons() {
+      const buttons = document.querySelectorAll("[data-chart-range]");
+      buttons.forEach(button => {
+        const range = button.dataset.chartRange;
+        const config = LIVE_CHART_RANGES[range];
+        if (config) button.textContent = t(config.labelKey);
+        button.classList.toggle("active", range === liveChartRange);
+        button.setAttribute("aria-pressed", range === liveChartRange ? "true" : "false");
+      });
+      const group = document.querySelector(".chart-range-group");
+      if (group) group.setAttribute("aria-label", t("chartRangeLabel"));
+    }
+
+    function initLiveChartControls() {
+      const buttons = document.querySelectorAll("[data-chart-mode]");
+      updateLiveChartModeButtons();
+      buttons.forEach(button => button.addEventListener("click", () => {
+        const mode = button.dataset.chartMode;
+        if (!LIVE_CHART_MODES.includes(mode) || mode === liveChartMode) return;
+        liveChartMode = mode;
+        storeLiveChartMode(liveChartMode);
+        updateLiveChartModeButtons();
+        renderLiveMarket();
+      }));
+      const rangeButtons = document.querySelectorAll("[data-chart-range]");
+      updateLiveChartRangeButtons();
+      rangeButtons.forEach(button => button.addEventListener("click", () => {
+        const range = button.dataset.chartRange;
+        if (!LIVE_CHART_RANGES[range] || range === liveChartRange) return;
+        liveChartRange = range;
+        storeLiveChartRange(liveChartRange);
+        liveState = { ...liveState, status: "loading", series: [] };
+        updateLiveChartRangeButtons();
+        renderLiveMarket();
+        refreshLiveMarket();
+      }));
+    }
+
+    function infoFor(key) {
+      return infoContent[currentLanguage][key] || infoContent.en[key] || { title: "", body: "" };
+    }
+
+    function showInfoModal(key) {
+      const content = infoFor(key);
+      document.getElementById("sectionInfoTitle").textContent = content.title;
+      document.getElementById("sectionInfoBody").textContent = content.body;
+      const modal = document.getElementById("sectionInfoModal");
+      modal.classList.add("visible");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function hideInfoModal() {
+      const modal = document.getElementById("sectionInfoModal");
+      modal.classList.remove("visible");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function initSectionInfo() {
+      document.querySelectorAll("[data-info-key]").forEach(button => {
+        const key = button.dataset.infoKey;
+        button.addEventListener("mouseenter", () => showInfoModal(key));
+        button.addEventListener("focus", () => showInfoModal(key));
+        button.addEventListener("mouseleave", hideInfoModal);
+        button.addEventListener("blur", hideInfoModal);
+      });
+      const modal = document.getElementById("sectionInfoModal");
+      modal.addEventListener("mouseenter", () => modal.classList.add("visible"));
+      modal.addEventListener("mouseleave", hideInfoModal);
+    }
+
+    function loadProfitSettings() {
+      try {
+        return {
+          entryPrice: Number(localStorage.getItem("ethProfitEntryPrice")) || 0,
+          mode: localStorage.getItem("ethProfitMode") || "balanced",
+          maxPosition: Number(localStorage.getItem("ethMaxPosition")) || 25,
+          localHigh: Number(localStorage.getItem("ethLocalHigh")) || 0
+        };
+      } catch (error) {
+        return { entryPrice: 0, mode: "balanced", maxPosition: 25, localHigh: 0 };
+      }
+    }
+
+    function saveProfitSettings() {
+      try {
+        localStorage.setItem("ethProfitEntryPrice", String(profitSettings.entryPrice || ""));
+        localStorage.setItem("ethProfitMode", profitSettings.mode);
+        localStorage.setItem("ethMaxPosition", String(profitSettings.maxPosition || 25));
+        localStorage.setItem("ethLocalHigh", String(profitSettings.localHigh || ""));
+      } catch (error) {
+        // Local storage can be unavailable in hardened file contexts.
+      }
+    }
+
+    function loadJournalEntries() {
+      try {
+        const raw = localStorage.getItem("ethTradingJournal");
+        return raw ? JSON.parse(raw) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveJournalEntries() {
+      try {
+        localStorage.setItem("ethTradingJournal", JSON.stringify(journalEntries));
+      } catch (error) {
+        // Local storage can be unavailable in hardened file contexts.
+      }
+    }
+
+    function getResult(id) {
+      return results.find(result => result.id === id && result.status === "live");
+    }
+
+    function latestValue(id) {
+      const result = getResult(id);
+      return result?.series?.at(-1)?.value ?? NaN;
+    }
+
+    function seriesFor(id) {
+      return getResult(id)?.series || [];
+    }
+
+    function avg(values) {
+      const clean = values.filter(Number.isFinite);
+      if (!clean.length) return NaN;
+      return clean.reduce((sum, value) => sum + value, 0) / clean.length;
+    }
+
+    function clamp(value, min = 0, max = 100) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function pctText(value) {
+      if (!Number.isFinite(value)) return "--";
+      return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+    }
+
+    function scoreTrend(id, shortOffset = 7, longOffset = 30) {
+      const series = seriesFor(id);
+      return {
+        short: pctChange(series, Math.min(shortOffset, Math.max(series.length - 1, 1))),
+        long: pctChange(series, Math.min(longOffset, Math.max(series.length - 1, 1)))
+      };
+    }
+
+    function point(condition, label, value, weight, positive = true) {
+      return { condition, label, value, weight, positive };
+    }
+
+    function computeScore(name, items, reverse = false) {
+      const available = items.filter(item => Number.isFinite(item.value) || typeof item.condition === "boolean");
+      if (!available.length) return { name, value: 0, items: [], available: false };
+      const totalWeight = available.reduce((sum, item) => sum + item.weight, 0);
+      const score = available.reduce((sum, item) => sum + (item.condition ? item.weight : 0), 0);
+      return { name, value: clamp((score / totalWeight) * 100), items: available, reverse, available: true };
+    }
+
+    function computeScores() {
+      const ethTrend = scoreTrend("eth_price");
+      const btcTrend = scoreTrend("eth_btc");
+      const volumeTrend = scoreTrend("eth_volume");
+      const feeTrend = scoreTrend("ethereum_fees");
+      const feeMcapTrend = scoreTrend("fee_mcap");
+      const feesTvlTrend = scoreTrend("fees_tvl");
+      const dexTvlTrend = scoreTrend("dex_tvl");
+      const tvlTrend = scoreTrend("ethereum_tvl");
+      const stableTrend = scoreTrend("stable_supply");
+      const dexTrend = scoreTrend("eth_dex_volume");
+      const l2TvlTrend = scoreTrend("l2_aggregate_tvl");
+      const l2TxTrend = scoreTrend("ecosystem_txcount");
+      const daaTrend = scoreTrend("ecosystem_daa");
+      const blobTrend = scoreTrend("blob_data_posted");
+      const profitTrend = scoreTrend("l2_profit");
+      const volatility = latestValue("eth_volatility");
+      const drawdown = latestValue("eth_drawdown");
+      const failedCount = results.filter(result => result.status !== "live").length;
+      const liveStale = liveState.status !== "live";
+      const scores = [
+        computeScore("Market Momentum", [
+          point(ethTrend.short > 0, "ETH 7D", ethTrend.short, 20),
+          point(ethTrend.long > 0, "ETH 30D", ethTrend.long, 20),
+          point(btcTrend.short > 0, "ETH/BTC 7D", btcTrend.short, 25),
+          point(volumeTrend.short > volumeTrend.long, "Volume impulse", volumeTrend.short, 20),
+          point(drawdown > -15, "Drawdown guard", drawdown, 15)
+        ]),
+        computeScore("Fundamental Demand", [
+          point(feeTrend.short > 0, "Fees 7D", feeTrend.short, 25),
+          point(feeMcapTrend.short > 0, "Fees/MCap", feeMcapTrend.short, 25),
+          point(feesTvlTrend.short > 0, "Fees/TVL", feesTvlTrend.short, 25),
+          point(dexTvlTrend.short > 0, "DEX/TVL", dexTvlTrend.short, 25)
+        ]),
+        computeScore("Liquidity", [
+          point(tvlTrend.short > 0, "Ethereum TVL", tvlTrend.short, 25),
+          point(stableTrend.short > 0, "Stablecoins", stableTrend.short, 25),
+          point(dexTrend.short > 0, "DEX volume", dexTrend.short, 25),
+          point(l2TvlTrend.short > 0, "L2 TVL", l2TvlTrend.short, 25)
+        ]),
+        computeScore("L2 Adoption", [
+          point(l2TxTrend.short > 0, "L2 tx", l2TxTrend.short, 25),
+          point(daaTrend.short > 0, "DAA", daaTrend.short, 25),
+          point(blobTrend.short > 0, "Blob data", blobTrend.short, 25),
+          point(profitTrend.short > 0 && latestValue("l2_profit") > 0, "L2 profit", profitTrend.short, 25)
+        ]),
+        computeScore("Risk", [
+          point(volatility > 70, "High volatility", volatility, 22, false),
+          point(drawdown < -20, "Deep drawdown", drawdown, 22, false),
+          point(btcTrend.short < 0 && btcTrend.long < 0, "ETH/BTC weak", btcTrend.short, 22, false),
+          point(tvlTrend.short < 0 && feeTrend.short < 0, "Fees/TVL weak", avg([tvlTrend.short, feeTrend.short]), 22, false),
+          point(failedCount > 0 || liveStale, "Source stale/failed", failedCount + (liveStale ? 1 : 0), 12, false)
+        ], true)
+      ];
+      const dataOk = scores.slice(0, 4).every(score => score.available) && failedCount === 0 && !liveStale;
+      const regime = detectRegime(scores, dataOk);
+      scoreState = { scores, regime, dataOk, failedCount, liveStale, updatedAt: new Date() };
+      return scoreState;
+    }
+
+    function detectRegime(scores, dataOk) {
+      const byName = Object.fromEntries(scores.map(score => [score.name, score.value]));
+      const market = byName["Market Momentum"] || 0;
+      const demand = byName["Fundamental Demand"] || 0;
+      const liquidity = byName["Liquidity"] || 0;
+      const l2 = byName["L2 Adoption"] || 0;
+      const risk = byName["Risk"] || 0;
+      if (!dataOk) return { key: "noEdge", label: t("noEdge"), action: t("noTradeHint"), confidence: 20, tone: "bad" };
+      if (risk >= 75) return { key: "riskOff", label: t("riskOff"), action: t("reduceExposure"), confidence: clamp(risk), tone: "bad" };
+      if (market >= 65 && demand >= 60 && liquidity >= 55 && l2 >= 55) return { key: "confirmedStrength", label: t("confirmedStrength"), action: t("constructive"), confidence: clamp(avg([market, demand, liquidity, l2, 100 - risk])), tone: "good" };
+      if (market >= 65 && demand < 45) return { key: "fragileRally", label: t("fragileRally"), action: t("avoidChase"), confidence: clamp(avg([market, 100 - demand, risk])), tone: "warn" };
+      if (demand >= 60 && market < 45 && risk < 65) return { key: "accumulationWatch", label: t("accumulationWatch"), action: t("waitConfirmation"), confidence: clamp(avg([demand, l2, 100 - risk])), tone: "warn" };
+      return { key: "noEdge", label: t("noEdge"), action: t("noTradeHint"), confidence: clamp(avg([market, demand, liquidity, l2, 100 - risk])), tone: "warn" };
+    }
+
+    async function fetchJSON(url) {
+      if (!cache.has(url)) {
+        cache.set(url, fetchWithTimeout(url, 20000).then(response => {
+          if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+          return response.json();
+        }));
+      }
+      return cache.get(url);
+    }
+
+    async function fetchWithTimeout(url, timeoutMs) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { cache: "no-store", signal: controller.signal });
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function fetchLiveJSON(url) {
+      const response = await fetchWithTimeout(url, 8000);
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return response.json();
+    }
+
+    function day(msOrSec) {
+      const ms = msOrSec > 9999999999 ? msOrSec : msOrSec * 1000;
+      return new Date(ms).toISOString().slice(0, 10);
+    }
+
+    function trimSeries(series, days = 90) {
+      return series.filter(point => Number.isFinite(point.value)).slice(-days);
+    }
+
+    function fromPairs(pairs, days = 90) {
+      return trimSeries(pairs.map(([time, value]) => ({ date: day(time), value: Number(value) })), days);
+    }
+
+    function fromTimestampValue(rows, days = 90) {
+      return trimSeries(rows.map(row => ({ date: day(row.date), value: Number(row.totalLiquidityUSD ?? row.tvl ?? row.value) })), days);
+    }
+
+    function fromTotalDataChart(rows, days = 90) {
+      return trimSeries(rows.map(([time, value]) => ({ date: day(time), value: Number(value) })), days);
+    }
+
+    function stableUsdSeries(rows, days = 90) {
+      return trimSeries(rows.map(row => ({ date: day(Number(row.date)), value: Number(row.totalCirculatingUSD?.peggedUSD ?? row.totalCirculating?.peggedUSD) })), days);
+    }
+
+    function apySeries(rows, days = 90) {
+      return trimSeries(rows.map(row => ({ date: row.timestamp.slice(0, 10), value: Number(row.apy) })), days);
+    }
+
+    function sameDateMap(series) {
+      const map = new Map();
+      series.forEach(point => map.set(point.date, point.value));
+      return map;
+    }
+
+    function combineSeries(a, b, op, days = 90) {
+      const bm = sameDateMap(b);
+      const matched = trimSeries(a.map(point => {
+        const other = bm.get(point.date);
+        return { date: point.date, value: Number.isFinite(other) ? op(point.value, other) : NaN };
+      }), days);
+      if (matched.length >= Math.min(days, a.length, b.length)) return matched;
+      const n = Math.min(days, a.length, b.length);
+      const aa = a.slice(-n);
+      const bb = b.slice(-n);
+      return trimSeries(aa.map((point, index) => ({ date: point.date, value: op(point.value, bb[index].value) })), days);
+    }
+
+    function addMany(seriesList, days = 90) {
+      const map = new Map();
+      seriesList.forEach(series => {
+        series.forEach(point => map.set(point.date, (map.get(point.date) || 0) + point.value));
+      });
+      return trimSeries([...map.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, value]) => ({ date, value })), days);
+    }
+
+    function rollingVol(priceSeries, days = 90) {
+      const returns = [];
+      for (let i = 1; i < priceSeries.length; i++) {
+        returns.push({ date: priceSeries[i].date, value: Math.log(priceSeries[i].value / priceSeries[i - 1].value) });
+      }
+      return trimSeries(returns.map((point, index) => {
+        const window = returns.slice(Math.max(0, index - 29), index + 1).map(row => row.value);
+        const mean = window.reduce((sum, value) => sum + value, 0) / window.length;
+        const variance = window.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / Math.max(window.length - 1, 1);
+        return { date: point.date, value: Math.sqrt(variance) * Math.sqrt(365) * 100 };
+      }), days);
+    }
+
+    function drawdown(priceSeries, days = 90) {
+      let peak = -Infinity;
+      return trimSeries(priceSeries.map(point => {
+        peak = Math.max(peak, point.value);
+        return { date: point.date, value: ((point.value / peak) - 1) * 100 };
+      }), days);
+    }
+
+    async function chainTvl(chain) {
+      const data = await fetchJSON(`https://api.llama.fi/v2/historicalChainTvl/${encodeURIComponent(chain)}`);
+      return fromTimestampValue(data);
+    }
+
+    async function protocolEthTvl(slug) {
+      const data = await fetchJSON(ENDPOINTS[slug]);
+      const rows = data.chainTvls?.Ethereum?.tvl;
+      if (!rows) throw new Error(`${slug} Ethereum TVL series unavailable`);
+      return fromTimestampValue(rows);
+    }
+
+    async function growthepieRows() {
+      return fetchJSON(ENDPOINTS.growthepieFundamentals);
+    }
+
+    function growthepieAggregate(rows, metricKey, options = {}) {
+      const excluded = new Set(options.excludeOrigins || []);
+      const map = new Map();
+      rows.forEach(row => {
+        if (row.metric_key !== metricKey || excluded.has(row.origin_key)) return;
+        const value = Number(row.value);
+        if (!Number.isFinite(value)) return;
+        map.set(row.date, (map.get(row.date) || 0) + value);
+      });
+      return trimSeries([...map.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, value]) => ({ date, value })), options.days || 90);
+    }
+
+    /*
+      Metric source mapping:
+      - eth_price, eth_mcap, eth_volume: CoinGecko Ethereum market_chart.
+      - eth_volatility, eth_drawdown: derived from CoinGecko ETH prices.
+      - eth_btc: derived from CoinGecko ETH and BTC market_chart prices.
+      - ethereum_fees: DefiLlama Ethereum fees totalDataChart.
+      - ethereum_tvl: DefiLlama Ethereum historicalChainTvl.
+      - eth_dex_volume: DefiLlama Ethereum DEX overview totalDataChart.
+      - uniswap_tvl, curve_tvl, aave_tvl: DefiLlama protocol Ethereum-chain TVL.
+      - fee_mcap, fees_tvl, dex_tvl, stable_tvl: derived from the live source series above.
+      - lido_apy, rocket_apy: DefiLlama yields chart endpoints.
+      - stable_supply: DefiLlama Ethereum stablecoincharts.
+      - base_tvl, arbitrum_tvl, optimism_tvl, l2_aggregate_tvl: DefiLlama historicalChainTvl by L2.
+      - ecosystem_txcount, ecosystem_daa, l2_profit, blob_data_posted: growthepie fundamentals daily export.
+      - lido_tvl, rocket_tvl, lido_eth_proxy: DefiLlama protocol TVL plus CoinGecko ETH price for proxy ETH units.
+      Excluded from working dashboard: beaconcha.in validator metrics returned HTTP 401 without an API key.
+    */
+    const metricDefs = [
+      { id: "eth_price", name: "ETH Price", category: "Price/Market", unit: "usd", source: "CoinGecko", url: ENDPOINTS.cgEth, why: "Base market signal for ETH valuation and denominator for derived network ratios.", compute: async () => fromPairs((await fetchJSON(ENDPOINTS.cgEth)).prices, 365) },
+      { id: "eth_mcap", name: "ETH Market Cap", category: "Price/Market", unit: "usd", source: "CoinGecko", url: ENDPOINTS.cgEth, why: "Network value proxy used to normalize fees, liquidity, and activity.", compute: async () => fromPairs((await fetchJSON(ENDPOINTS.cgEth)).market_caps) },
+      { id: "eth_volume", name: "ETH Spot Volume", category: "Price/Market", unit: "usd", source: "CoinGecko", url: ENDPOINTS.cgEth, why: "Shows market liquidity and near-term participation around ETH.", compute: async () => fromPairs((await fetchJSON(ENDPOINTS.cgEth)).total_volumes) },
+      { id: "eth_volatility", name: "30D Realized Volatility", category: "Price/Market", unit: "pct", source: "CoinGecko derived", url: ENDPOINTS.cgEth, why: "Risk input for valuation, collateral haircuts, and position sizing.", compute: async () => rollingVol(fromPairs((await fetchJSON(ENDPOINTS.cgEth)).prices, 395), 365) },
+      { id: "eth_btc", name: "ETH / BTC Ratio", category: "Price/Market", unit: "ratio", source: "CoinGecko derived", url: ENDPOINTS.cgEth, why: "Relative strength against Bitcoin, the main crypto reserve asset.", compute: async () => combineSeries(fromPairs((await fetchJSON(ENDPOINTS.cgEth)).prices, 365), fromPairs((await fetchJSON(ENDPOINTS.cgBtc)).prices, 365), (a, b) => a / b, 365) },
+      { id: "eth_drawdown", name: "ETH 90D Drawdown", category: "Price/Market", unit: "pct", source: "CoinGecko derived", url: ENDPOINTS.cgEth, why: "Measures how far ETH trades below its recent local high.", compute: async () => drawdown(fromPairs((await fetchJSON(ENDPOINTS.cgEth)).prices, 365), 365) },
+
+      { id: "ethereum_fees", name: "Ethereum Daily Fees", category: "On-chain Activity", unit: "usd", source: "DefiLlama fees", url: ENDPOINTS.fees, why: "Direct demand signal for Ethereum blockspace.", compute: async () => fromTotalDataChart((await fetchJSON(ENDPOINTS.fees)).totalDataChart) },
+      { id: "ethereum_tvl", name: "Ethereum DeFi TVL", category: "On-chain Activity", unit: "usd", source: "DefiLlama TVL", url: ENDPOINTS.ethTvl, why: "Capital committed to Ethereum DeFi applications.", compute: async () => fromTimestampValue(await fetchJSON(ENDPOINTS.ethTvl)) },
+      { id: "eth_dex_volume", name: "Ethereum DEX Volume", category: "On-chain Activity", unit: "usd", source: "DefiLlama DEX volumes", url: ENDPOINTS.dexs, why: "Proxy for exchange utility and on-chain trading demand.", compute: async () => fromTotalDataChart((await fetchJSON(ENDPOINTS.dexs)).totalDataChart) },
+      { id: "uniswap_tvl", name: "Uniswap Ethereum TVL", category: "On-chain Activity", unit: "usd", source: "DefiLlama protocol TVL", url: ENDPOINTS.uniswap, why: "Liquidity depth in Ethereum's largest DEX family.", compute: async () => protocolEthTvl("uniswap") },
+      { id: "curve_tvl", name: "Curve Ethereum TVL", category: "On-chain Activity", unit: "usd", source: "DefiLlama protocol TVL", url: ENDPOINTS.curve, why: "Stable-swap liquidity depth, important for stablecoin and staking-token routing.", compute: async () => protocolEthTvl("curve") },
+      { id: "aave_tvl", name: "Aave V3 Ethereum TVL", category: "On-chain Activity", unit: "usd", source: "DefiLlama protocol TVL", url: ENDPOINTS.aave, why: "Lending collateral base and credit-market depth on Ethereum.", compute: async () => protocolEthTvl("aave") },
+
+      { id: "fee_mcap", name: "Fees / Market Cap", category: "Network Economics", unit: "bps", source: "CoinGecko + DefiLlama derived", url: ENDPOINTS.fees, why: "A revenue-yield style valuation ratio for Ethereum blockspace.", compute: async () => combineSeries(fromTotalDataChart((await fetchJSON(ENDPOINTS.fees)).totalDataChart), fromPairs((await fetchJSON(ENDPOINTS.cgEth)).market_caps), (a, b) => (a / b) * 10000) },
+      { id: "fees_tvl", name: "Fees / DeFi TVL", category: "Network Economics", unit: "bps", source: "DefiLlama derived", url: ENDPOINTS.fees, why: "Shows fee productivity relative to capital locked on Ethereum.", compute: async () => combineSeries(fromTotalDataChart((await fetchJSON(ENDPOINTS.fees)).totalDataChart), fromTimestampValue(await fetchJSON(ENDPOINTS.ethTvl)), (a, b) => (a / b) * 10000) },
+      { id: "dex_tvl", name: "DEX Volume / TVL", category: "Network Economics", unit: "pct", source: "DefiLlama derived", url: ENDPOINTS.dexs, why: "Capital efficiency of Ethereum DeFi liquidity.", compute: async () => combineSeries(fromTotalDataChart((await fetchJSON(ENDPOINTS.dexs)).totalDataChart), fromTimestampValue(await fetchJSON(ENDPOINTS.ethTvl)), (a, b) => (a / b) * 100) },
+      { id: "stable_tvl", name: "Stablecoins / TVL", category: "Network Economics", unit: "pct", source: "DefiLlama derived", url: ENDPOINTS.stableChart, why: "Share of Ethereum DeFi liquidity represented by dollar-pegged settlement assets.", compute: async () => combineSeries(stableUsdSeries(await fetchJSON(ENDPOINTS.stableChart)), fromTimestampValue(await fetchJSON(ENDPOINTS.ethTvl)), (a, b) => (a / b) * 100) },
+      { id: "lido_apy", name: "Lido stETH APY", category: "Network Economics", unit: "pct", source: "DefiLlama yields", url: ENDPOINTS.lidoApy, why: "Benchmark staking yield for ETH holders and DeFi collateral.", compute: async () => apySeries((await fetchJSON(ENDPOINTS.lidoApy)).data) },
+      { id: "rocket_apy", name: "Rocket Pool rETH APY", category: "Network Economics", unit: "pct", source: "DefiLlama yields", url: ENDPOINTS.rocketApy, why: "Decentralized liquid-staking yield comparator.", compute: async () => apySeries((await fetchJSON(ENDPOINTS.rocketApy)).data) },
+
+      { id: "stable_supply", name: "Ethereum Stablecoin Supply", category: "DeFi / Stablecoin / L2", unit: "usd", source: "DefiLlama stablecoins", url: ENDPOINTS.stableChart, why: "Dollar liquidity available for settlement, collateral, and DeFi activity.", compute: async () => stableUsdSeries(await fetchJSON(ENDPOINTS.stableChart)) },
+      { id: "base_tvl", name: "Base TVL", category: "DeFi / Stablecoin / L2", unit: "usd", source: "DefiLlama chain TVL", url: "https://api.llama.fi/v2/historicalChainTvl/Base", why: "Largest Ethereum-aligned L2 by recent DeFi liquidity.", compute: async () => chainTvl("Base") },
+      { id: "arbitrum_tvl", name: "Arbitrum TVL", category: "DeFi / Stablecoin / L2", unit: "usd", source: "DefiLlama chain TVL", url: "https://api.llama.fi/v2/historicalChainTvl/Arbitrum", why: "Major optimistic-rollup liquidity base.", compute: async () => chainTvl("Arbitrum") },
+      { id: "optimism_tvl", name: "OP Mainnet TVL", category: "DeFi / Stablecoin / L2", unit: "usd", source: "DefiLlama chain TVL", url: "https://api.llama.fi/v2/historicalChainTvl/OP%20Mainnet", why: "OP Stack liquidity and application demand proxy.", compute: async () => chainTvl("OP Mainnet") },
+      { id: "l2_aggregate_tvl", name: "Core L2 Aggregate TVL", category: "DeFi / Stablecoin / L2", unit: "usd", source: "DefiLlama chain TVL derived", url: "https://api.llama.fi/v2/historicalChainTvl/{chain}", why: "Combined liquidity of major Ethereum scaling networks.", compute: async () => addMany(await Promise.all(["Base", "Arbitrum", "OP Mainnet", "Linea", "Scroll", "ZKsync Era"].map(chainTvl))) },
+
+      { id: "ecosystem_txcount", name: "Ecosystem Daily Transactions", category: "L2 Adoption / Blob Demand", unit: "count", source: "growthepie fundamentals", url: ENDPOINTS.growthepieFundamentals, why: "Aggregates Ethereum Mainnet and L2 transaction count to show real usage across the scaling ecosystem.", compute: async () => growthepieAggregate(await growthepieRows(), "txcount") },
+      { id: "ecosystem_daa", name: "Ecosystem Daily Active Addresses", category: "L2 Adoption / Blob Demand", unit: "count", source: "growthepie fundamentals", url: ENDPOINTS.growthepieFundamentals, why: "Shows the breadth of user activity across Ethereum L1 and major L2 networks.", compute: async () => growthepieAggregate(await growthepieRows(), "daa") },
+      { id: "l2_profit", name: "L2 Onchain Profit", category: "L2 Adoption / Blob Demand", unit: "usd", source: "growthepie fundamentals", url: ENDPOINTS.growthepieFundamentals, why: "Measures L2 fees and MEV minus settlement and data-availability costs; useful for sustainability checks.", compute: async () => growthepieAggregate(await growthepieRows(), "profit_usd", { excludeOrigins: ["ethereum"] }) },
+      { id: "blob_data_posted", name: "Blob Data Posted", category: "L2 Adoption / Blob Demand", unit: "bytes", source: "growthepie fundamentals", url: ENDPOINTS.growthepieFundamentals, why: "Tracks how much EIP-4844 blob data rollups post to Ethereum, a direct data-availability demand signal.", compute: async () => growthepieAggregate(await growthepieRows(), "blob_size_bytes", { excludeOrigins: ["ethereum"] }) },
+
+      { id: "lido_tvl", name: "Lido Ethereum TVL", category: "Validation / Security / Staking", unit: "usd", source: "DefiLlama protocol TVL", url: ENDPOINTS.lido, why: "Liquid-staking capital controlled by the largest staking protocol.", compute: async () => protocolEthTvl("lido") },
+      { id: "rocket_tvl", name: "Rocket Pool Ethereum TVL", category: "Validation / Security / Staking", unit: "usd", source: "DefiLlama protocol TVL", url: ENDPOINTS.rocket, why: "Decentralized liquid-staking capital base.", compute: async () => protocolEthTvl("rocket") },
+      { id: "lido_eth_proxy", name: "Lido Staked ETH Proxy", category: "Validation / Security / Staking", unit: "eth", source: "DefiLlama + CoinGecko derived", url: ENDPOINTS.lido, why: "Approximates stETH exposure by dividing Lido Ethereum TVL by ETH price.", compute: async () => combineSeries(await protocolEthTvl("lido"), fromPairs((await fetchJSON(ENDPOINTS.cgEth)).prices), (a, b) => a / b) }
+    ];
+
+    function formatValue(value, unit) {
+      if (!Number.isFinite(value)) return t("notAvailableShort");
+      if (unit === "usd") return formatUsd(value);
+      if (unit === "pct") return `${value.toFixed(Math.abs(value) >= 10 ? 1 : 2)}%`;
+      if (unit === "bps") return `${value.toFixed(2)} bps`;
+      if (unit === "ratio") return value.toFixed(4);
+      if (unit === "eth") return `${compact(value)} ETH`;
+      if (unit === "count") return compact(value);
+      if (unit === "bytes") return formatBytes(value);
+      return compact(value);
+    }
+
+    function formatUsd(value) {
+      const abs = Math.abs(value);
+      if (abs >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
+      if (abs >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+      if (abs >= 1e6) return `$${(value / 1e6).toFixed(2)}M`;
+      if (abs >= 1e3) return `$${(value / 1e3).toFixed(2)}K`;
+      return `$${value.toFixed(2)}`;
+    }
+
+    function compact(value) {
+      const abs = Math.abs(value);
+      if (abs >= 1e9) return `${(value / 1e9).toFixed(2)}B`;
+      if (abs >= 1e6) return `${(value / 1e6).toFixed(2)}M`;
+      if (abs >= 1e3) return `${(value / 1e3).toFixed(2)}K`;
+      return value.toFixed(2);
+    }
+
+    function formatBytes(value) {
+      const abs = Math.abs(value);
+      if (abs >= 1e12) return `${(value / 1e12).toFixed(2)} TB`;
+      if (abs >= 1e9) return `${(value / 1e9).toFixed(2)} GB`;
+      if (abs >= 1e6) return `${(value / 1e6).toFixed(2)} MB`;
+      if (abs >= 1e3) return `${(value / 1e3).toFixed(2)} KB`;
+      return `${value.toFixed(0)} B`;
+    }
+
+    function formatPrice(value) {
+      if (!Number.isFinite(value)) return "--";
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function formatLocalTime(date) {
+      if (!date) return "--";
+      return date.toLocaleTimeString(currentLanguage === "ko" ? "ko-KR" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+
+    function formatShortTime(value) {
+      const date = value instanceof Date ? value : new Date(value);
+      if (Number.isNaN(date.getTime())) return "--";
+      return date.toLocaleTimeString(currentLanguage === "ko" ? "ko-KR" : "en-US", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function parseTicker(raw) {
+      const ticker = {
+        lastPrice: Number(raw.lastPrice),
+        priceChangePercent: Number(raw.priceChangePercent),
+        quoteVolume: Number(raw.quoteVolume),
+        highPrice: Number(raw.highPrice),
+        lowPrice: Number(raw.lowPrice)
+      };
+      if (!Number.isFinite(ticker.lastPrice)) throw new Error("ticker lastPrice unavailable");
+      return ticker;
+    }
+
+    function parseKlines(rows, maxPoints = 60) {
+      if (!Array.isArray(rows)) throw new Error("kline response unavailable");
+      return trimSeries(rows.map(row => ({
+        date: formatShortTime(Number(row[0])),
+        open: Number(row[1]),
+        value: Number(row[4]),
+        high: Number(row[2]),
+        low: Number(row[3])
+      })), maxPoints);
+    }
+
+    function parseDailyKlines(rows) {
+      if (!Array.isArray(rows)) throw new Error("daily kline response unavailable");
+      return rows.map(row => ({ date: new Date(Number(row[0])).toISOString().slice(0, 10), value: Number(row[4]) }))
+        .filter(point => Number.isFinite(point.value));
+    }
+
+    async function loadBacktestData() {
+      try {
+        const [ethRows, btcRows] = await Promise.all([
+          fetchJSON(ENDPOINTS.binanceEthDaily),
+          fetchJSON(ENDPOINTS.binanceBtcDaily)
+        ]);
+        const eth = parseDailyKlines(ethRows);
+        const btcMap = new Map(parseDailyKlines(btcRows).map(point => [point.date, point.value]));
+        const rows = eth.map((point, index) => {
+          const btc = btcMap.get(point.date);
+          return {
+            date: point.date,
+            eth_price: point.value,
+            eth_btc: Number.isFinite(btc) && btc > 0 ? point.value / btc : NaN,
+            index
+          };
+        }).filter(row => Number.isFinite(row.eth_btc));
+        let peak = -Infinity;
+        backtestRows = rows.map((row, index) => {
+          peak = Math.max(peak, row.eth_price);
+          const returns = rows.slice(Math.max(1, index - 29), index + 1).map((item, idx, arr) => idx === 0 ? 0 : Math.log(item.eth_price / arr[idx - 1].eth_price)).slice(1);
+          const mean = avg(returns);
+          const variance = avg(returns.map(value => Math.pow(value - mean, 2)));
+          return {
+            ...row,
+            eth_volatility: Number.isFinite(variance) ? Math.sqrt(variance) * Math.sqrt(365) * 100 : 0,
+            eth_drawdown: peak > 0 ? ((row.eth_price / peak) - 1) * 100 : 0
+          };
+        });
+      } catch (error) {
+        backtestRows = [];
+      }
+    }
+
+    function renderLiveSvg(series, requestedWidth = 900, mode = "range") {
+      if (!series || series.length < 2) return `<div class="chart-meta">${t("sourceUnavailable")}</div>`;
+      const chartMode = LIVE_CHART_MODES.includes(mode) ? mode : "range";
+      const showRangeBand = chartMode === "range";
+      const showCandles = chartMode === "candle";
+      const width = Math.max(360, Math.round(requestedWidth));
+      const height = width < 560 ? 220 : 260;
+      const padX = 10;
+      const padTop = 6;
+      const padBottom = 22;
+      const chartBottom = height - padBottom;
+      const values = series.flatMap(point => (showRangeBand || showCandles)
+        ? [
+            point.value,
+            Number.isFinite(point.open) ? point.open : point.value,
+            Number.isFinite(point.high) ? point.high : point.value,
+            Number.isFinite(point.low) ? point.low : point.value
+          ]
+        : [point.value]
+      );
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const span = max - min || 1;
+      const yFor = value => padTop + (1 - ((value - min) / span)) * (chartBottom - padTop);
+      const points = series.map((point, index) => {
+        const x = padX + (index / Math.max(series.length - 1, 1)) * (width - padX * 2);
+        const y = yFor(point.value);
+        return [x, y];
+      });
+      const path = points.map(([x, y], index) => `${index ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+      const area = `${path} L${points[points.length - 1][0].toFixed(2)},${chartBottom} L${points[0][0].toFixed(2)},${chartBottom} Z`;
+      let rangeBand = "";
+      if (showRangeBand) {
+        const highPoints = series.map((point, index) => {
+          const x = points[index][0];
+          const y = yFor(Number.isFinite(point.high) ? point.high : point.value);
+          return [x, y];
+        });
+        const lowPoints = series.map((point, index) => {
+          const x = points[index][0];
+          const y = yFor(Number.isFinite(point.low) ? point.low : point.value);
+          return [x, y];
+        });
+        const bandPath = `${highPoints.map(([x, y], index) => `${index ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ")} ${lowPoints.slice().reverse().map(([x, y]) => `L${x.toFixed(2)},${y.toFixed(2)}`).join(" ")} Z`;
+        rangeBand = `<path class="range-band" d="${bandPath}"></path>`;
+      }
+      const [lastX, lastY] = points[points.length - 1];
+      const midIndex = Math.floor((series.length - 1) / 2);
+      const labelIndexes = [0, midIndex, series.length - 1].filter((value, index, arr) => arr.indexOf(value) === index);
+      const timeLabels = labelIndexes.map(index => {
+        const anchor = index === 0 ? "start" : (index === series.length - 1 ? "end" : "middle");
+        return `<text class="axis-label" x="${points[index][0].toFixed(2)}" y="${height - 4}" text-anchor="${anchor}">${escapeHtml(series[index].date)}</text>`;
+      }).join("");
+      const minuteGrid = points.map(([x]) => {
+        const fixedX = x.toFixed(2);
+        return `<line class="minute-grid" x1="${fixedX}" y1="${padTop}" x2="${fixedX}" y2="${chartBottom}"></line>`;
+      }).join("");
+      const tenMinuteIndexes = points
+        .map((_, index) => index)
+        .filter(index => index === 0 || index === points.length - 1 || index % 10 === 0);
+      const tenMinuteGrid = tenMinuteIndexes.map(index => {
+        const x = points[index][0].toFixed(2);
+        return `<line class="ten-minute-grid" x1="${x}" y1="${padTop}" x2="${x}" y2="${chartBottom}"></line>`;
+      }).join("");
+      const priceLabels = `<text class="price-label" x="${width - padX}" y="${padTop + 4}">${escapeHtml(formatPrice(max))}</text>
+        <text class="price-label" x="${width - padX}" y="${chartBottom - 4}">${escapeHtml(formatPrice(min))}</text>`;
+      const hitWidth = (width - padX * 2) / Math.max(series.length - 1, 1);
+      const candleWidth = Math.max(2, Math.min(7, hitWidth * 0.55));
+      const candles = showCandles ? series.map((point, index) => {
+        const [x] = points[index];
+        const open = Number.isFinite(point.open) ? point.open : point.value;
+        const close = point.value;
+        const high = Number.isFinite(point.high) ? point.high : Math.max(open, close);
+        const low = Number.isFinite(point.low) ? point.low : Math.min(open, close);
+        const yOpen = yFor(open);
+        const yClose = yFor(close);
+        const yHigh = yFor(high);
+        const yLow = yFor(low);
+        const bodyY = Math.min(yOpen, yClose);
+        const bodyHeight = Math.max(2, Math.abs(yClose - yOpen));
+        const direction = close >= open ? "up" : "down";
+        return `<g>
+          <line class="candle-wick candle-${direction}" x1="${x.toFixed(2)}" y1="${yHigh.toFixed(2)}" x2="${x.toFixed(2)}" y2="${yLow.toFixed(2)}"></line>
+          <rect class="candle-body candle-${direction}" x="${(x - candleWidth / 2).toFixed(2)}" y="${bodyY.toFixed(2)}" width="${candleWidth.toFixed(2)}" height="${bodyHeight.toFixed(2)}"></rect>
+        </g>`;
+      }).join("") : "";
+      const hoverPoints = series.map((point, index) => {
+        const [x, y] = points[index];
+        const tooltipWidth = 150;
+        const tooltipHeight = 56;
+        const tooltipX = Math.min(Math.max(x - tooltipWidth / 2, padX), width - padX - tooltipWidth);
+        const tooltipY = Math.max(y - tooltipHeight - 10, padTop);
+        const zoneX = index === 0 ? 0 : x - hitWidth / 2;
+        const zoneWidth = index === series.length - 1 ? width - zoneX : hitWidth;
+        const high = Number.isFinite(point.high) ? point.high : point.value;
+        const low = Number.isFinite(point.low) ? point.low : point.value;
+        const label = `${point.date} · ${formatPrice(point.value)} · ${formatPrice(low)}-${formatPrice(high)}`;
+        return `<g class="live-hover-point">
+          <rect class="hover-zone" tabindex="0" aria-label="${escapeHtml(label)}" x="${zoneX.toFixed(2)}" y="0" width="${zoneWidth.toFixed(2)}" height="${height}"></rect>
+          <line class="hover-guide" x1="${x.toFixed(2)}" y1="${padTop}" x2="${x.toFixed(2)}" y2="${chartBottom}"></line>
+          <circle class="hover-dot" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="4"></circle>
+          <g class="hover-tooltip" transform="translate(${tooltipX.toFixed(2)} ${tooltipY.toFixed(2)})">
+            <rect width="${tooltipWidth}" height="${tooltipHeight}"></rect>
+            <text x="8" y="16">${escapeHtml(point.date)}</text>
+            <text x="8" y="31">${escapeHtml(formatPrice(point.value))}</text>
+            <text x="8" y="46">${escapeHtml(`${formatPrice(low)}-${formatPrice(high)}`)}</text>
+          </g>
+        </g>`;
+      }).join("");
+      const mainSeries = showCandles
+        ? candles
+        : `${rangeBand}
+        <path class="area" d="${area}"></path>
+        <path class="line" d="${path}"></path>`;
+      const lastMarker = showCandles ? "" : `<circle class="last-point" cx="${lastX.toFixed(2)}" cy="${lastY.toFixed(2)}" r="4"></circle>`;
+      const rangeConfig = LIVE_CHART_RANGES[liveChartRange] || LIVE_CHART_RANGES["1h"];
+      return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="ETH USDT ${escapeHtml(t(rangeConfig.labelKey))} ${chartMode} chart">
+        <line class="axis" x1="${padX}" y1="${chartBottom}" x2="${width - padX}" y2="${chartBottom}"></line>
+        ${minuteGrid}
+        ${tenMinuteGrid}
+        <line class="current-line" x1="${padX}" y1="${lastY.toFixed(2)}" x2="${width - padX}" y2="${lastY.toFixed(2)}"></line>
+        <line class="latest-guide" x1="${lastX.toFixed(2)}" y1="${padTop}" x2="${lastX.toFixed(2)}" y2="${chartBottom}"></line>
+        ${mainSeries}
+        ${lastMarker}
+        <text class="current-label" x="${width - padX}" y="${Math.max(padTop + 12, lastY - 6).toFixed(2)}">${escapeHtml(formatPrice(series[series.length - 1].value))}</text>
+        ${priceLabels}
+        ${timeLabels}
+        ${hoverPoints}
+      </svg>`;
+    }
+
+    function renderLiveRange(ticker) {
+      if (!ticker || !Number.isFinite(ticker.lowPrice) || !Number.isFinite(ticker.highPrice) || !Number.isFinite(ticker.lastPrice) || ticker.highPrice <= ticker.lowPrice) {
+        return "";
+      }
+      const position = Math.min(100, Math.max(0, ((ticker.lastPrice - ticker.lowPrice) / (ticker.highPrice - ticker.lowPrice)) * 100));
+      return `<div class="live-range-title">${escapeHtml(t("range24h"))}</div>
+        <div class="range-track" aria-label="${escapeHtml(t("range24h"))}">
+          <span class="range-marker" style="left: ${position.toFixed(1)}%"></span>
+        </div>
+        <div class="range-labels">
+          <span>${escapeHtml(t("rangeLow"))} ${escapeHtml(formatPrice(ticker.lowPrice))}</span>
+          <span>${escapeHtml(t("rangeCurrent"))} ${escapeHtml(formatPrice(ticker.lastPrice))}</span>
+          <span>${escapeHtml(t("rangeHigh"))} ${escapeHtml(formatPrice(ticker.highPrice))}</span>
+        </div>`;
+    }
+
+    function renderLiveSourceMessage() {
+      const seconds = String(LIVE_POLL_MS / 1000);
+      const refreshed = liveState.updatedAt ? ` · ${t("recentRefreshInline")} ${formatLocalTime(liveState.updatedAt)}` : "";
+      return escapeHtml(`${t("liveSourceCompact").replace("{seconds}", seconds)}${refreshed}`);
+    }
+
+    function renderLiveRefreshInline() {
+      if (liveState.updatedAt) return `${t("refreshCadence")} · ${formatLocalTime(liveState.updatedAt)}`;
+      return t("refreshCadence");
+    }
+
+    function renderLiveMarket() {
+      const statusEl = document.getElementById("liveStatus");
+      const priceEl = document.getElementById("livePrice");
+      const changeEl = document.getElementById("liveChange");
+      const messageEl = document.getElementById("liveMessage");
+      const ticker = liveState.ticker;
+      const hasValues = Boolean(ticker);
+      const statusClass = liveState.status === "live" ? "live" : (hasValues || liveState.status === "loading" ? "stale" : "failed");
+      statusEl.className = `live-status ${statusClass}`;
+      statusEl.textContent = liveState.status === "live" ? t("liveBadge") : (hasValues ? t("staleBadge") : t(`${liveState.status}Badge`));
+      document.getElementById("liveRefreshInline").textContent = renderLiveRefreshInline();
+      priceEl.textContent = hasValues ? formatPrice(ticker.lastPrice) : t("waitingForSource");
+      const change = hasValues ? ticker.priceChangePercent : NaN;
+      changeEl.className = `live-change ${Number.isFinite(change) ? (change >= 0 ? "up" : "down") : ""}`;
+      changeEl.textContent = Number.isFinite(change) ? `${t("changePrefix")} ${change >= 0 ? "+" : ""}${change.toFixed(2)}%` : t("changeUnavailable");
+      document.getElementById("liveVolume").textContent = hasValues ? formatUsd(ticker.quoteVolume) : "--";
+      document.getElementById("liveHigh").textContent = hasValues ? formatPrice(ticker.highPrice) : "--";
+      document.getElementById("liveLow").textContent = hasValues ? formatPrice(ticker.lowPrice) : "--";
+      document.getElementById("liveRangeValue").textContent = hasValues && Number.isFinite(ticker.highPrice) && Number.isFinite(ticker.lowPrice) ? formatPrice(ticker.highPrice - ticker.lowPrice) : "--";
+      const liveChartEl = document.getElementById("liveChart");
+      liveChartEl.innerHTML = renderLiveSvg(liveState.series, liveChartEl.clientWidth || 900, liveChartMode);
+      const rangeConfig = LIVE_CHART_RANGES[liveChartRange] || LIVE_CHART_RANGES["1h"];
+      const chartTitleEl = document.querySelector("[data-i18n='sixtyMinuteClose']");
+      const chartScopeEl = document.querySelector("[data-i18n='liveChartScope']");
+      if (chartTitleEl) chartTitleEl.textContent = t(rangeConfig.titleKey);
+      if (chartScopeEl) chartScopeEl.textContent = t(rangeConfig.scopeKey);
+      document.getElementById("liveChartMeta").textContent = t("oneMinuteCandles");
+      document.getElementById("liveRangePosition").innerHTML = renderLiveRange(ticker);
+      if (messageEl) {
+        if (liveState.status === "live") {
+          messageEl.innerHTML = renderLiveSourceMessage();
+        } else if (hasValues) {
+          messageEl.textContent = `${t("stalePrefix")}: ${t("keepingPrevious")} ${liveState.error || t("sourceUnavailable")}`;
+        } else {
+          messageEl.textContent = liveState.error ? `${t("failedPrefix")}: ${liveState.error}` : t("fetchingLive");
+        }
+      }
+      if (results.length) renderDecisionSuite();
+    }
+
+    function renderDecisionSuite() {
+      const state = computeScores();
+      renderDecisionPanel(state);
+      renderScores(state);
+      renderProfitPanel();
+      renderBacktest();
+      renderQualityPanel(state);
+      renderJournal();
+    }
+
+    function renderDecisionPanel(state) {
+      document.getElementById("regimeLabel").textContent = state.regime.label;
+      document.getElementById("actionHint").textContent = state.regime.action;
+      document.getElementById("confidenceValue").textContent = `${Math.round(state.regime.confidence)}%`;
+      document.getElementById("decisionNote").textContent = t("decisionStrengthNote");
+      const support = [];
+      const risks = [];
+      state.scores.forEach(score => {
+        const sorted = score.items.slice().sort((a, b) => b.weight - a.weight);
+        sorted.forEach(item => {
+          const text = `${item.label}: ${Number.isFinite(item.value) ? pctText(item.value) : item.condition ? "ok" : "weak"}`;
+          if (score.name === "Risk") {
+            if (item.condition) risks.push(text);
+          } else if (item.condition) {
+            support.push(text);
+          } else {
+            risks.push(text);
+          }
+        });
+      });
+      document.getElementById("supportList").innerHTML = (support.slice(0, 3).length ? support.slice(0, 3) : [t("noData")]).map(item => `<li>${item}</li>`).join("");
+      document.getElementById("riskList").innerHTML = (risks.slice(0, 3).length ? risks.slice(0, 3) : [t("noData")]).map(item => `<li>${item}</li>`).join("");
+    }
+
+    function scoreLabel(score) {
+      const map = {
+        "Market Momentum": currentLanguage === "ko" ? "시장 모멘텀" : "Market Momentum",
+        "Fundamental Demand": currentLanguage === "ko" ? "펀더멘털 수요" : "Fundamental Demand",
+        "Liquidity": currentLanguage === "ko" ? "유동성" : "Liquidity",
+        "L2 Adoption": currentLanguage === "ko" ? "L2 채택" : "L2 Adoption",
+        "Risk": currentLanguage === "ko" ? "리스크" : "Risk"
+      };
+      return map[score.name] || score.name;
+    }
+
+    function renderScores(state) {
+      document.getElementById("scoreGrid").innerHTML = state.scores.map(score => {
+        const value = Math.round(score.value);
+        const color = score.name === "Risk"
+          ? (value >= 75 ? "bad" : value >= 45 ? "warn" : "good")
+          : (value >= 70 ? "good" : value >= 45 ? "warn" : "bad");
+        const details = score.items.slice(0, 3).map(item => `${item.label} ${Number.isFinite(item.value) ? pctText(item.value) : item.condition ? "ok" : "weak"}`).join("<br>");
+        return `<article class="score-card">
+          <div class="score-name">${scoreLabel(score)}</div>
+          <div class="score-value">${value}</div>
+          <div class="score-bar"><div class="score-fill ${color}" style="width:${value}%"></div></div>
+          <div class="score-detail">${details || t("noData")}</div>
+        </article>`;
+      }).join("");
+    }
+
+    function initProfitControls() {
+      const entry = document.getElementById("entryPriceInput");
+      const mode = document.getElementById("strategyMode");
+      const maxPosition = document.getElementById("maxPositionInput");
+      entry.value = profitSettings.entryPrice || "";
+      mode.value = profitSettings.mode;
+      maxPosition.value = profitSettings.maxPosition;
+      [entry, mode, maxPosition].forEach(input => {
+        input.addEventListener("input", () => {
+          const previousEntry = profitSettings.entryPrice;
+          const nextEntry = Number(entry.value) || 0;
+          if (nextEntry !== previousEntry) profitSettings.localHigh = 0;
+          profitSettings.entryPrice = nextEntry;
+          profitSettings.mode = mode.value;
+          profitSettings.maxPosition = Number(maxPosition.value) || 25;
+          saveProfitSettings();
+          renderProfitPanel();
+        });
+      });
+    }
+
+    function renderProfitPanel() {
+      const price = liveState.ticker?.lastPrice || latestValue("eth_price");
+      const mode = STRATEGY_MODES[profitSettings.mode] || STRATEGY_MODES.balanced;
+      const entry = profitSettings.entryPrice;
+      const hasEntry = Number.isFinite(entry) && entry > 0;
+      if (!hasEntry && profitSettings.localHigh) {
+        profitSettings.localHigh = 0;
+        saveProfitSettings();
+      }
+      if (hasEntry && Number.isFinite(price)) {
+        const baselineHigh = Math.max(entry, price);
+        if (!Number.isFinite(profitSettings.localHigh) || profitSettings.localHigh < baselineHigh) {
+          profitSettings.localHigh = baselineHigh;
+          saveProfitSettings();
+        }
+      }
+      const pnl = hasEntry ? ((price - entry) / entry) * 100 : NaN;
+      const tp1 = hasEntry ? entry * (1 + mode.tp1) : NaN;
+      const tp2 = hasEntry ? entry * (1 + mode.tp2) : NaN;
+      const trail = hasEntry && Number.isFinite(profitSettings.localHigh) && profitSettings.localHigh > entry ? profitSettings.localHigh * (1 - mode.trail) : NaN;
+      const invalidation = hasEntry ? entry * (1 - mode.maxDrawdown) : NaN;
+      const portfolioRisk = hasEntry ? (Number(profitSettings.maxPosition) || 25) * mode.maxDrawdown : NaN;
+      const risk = scoreState?.scores?.find(score => score.name === "Risk")?.value ?? 100;
+      const regimeKey = scoreState?.regime?.key || "noEdge";
+      let action = hasEntry ? t("noTradeHint") : t("entryRequiredHint");
+      let note = hasEntry ? t("activePositionNote") : t("entryRequiredNote");
+      if (hasEntry && Number.isFinite(price)) {
+        if (price <= invalidation || risk >= 75) action = t("exitHint");
+        else if (price >= tp2 || (Number.isFinite(trail) && price <= trail && pnl > 0)) action = t("trimHint");
+        else if (regimeKey === "confirmedStrength" && pnl >= 0) action = t("holdHint");
+        else if (regimeKey === "confirmedStrength") action = t("addHint");
+        else action = t("holdHint");
+      } else if (regimeKey === "confirmedStrength") {
+        note = t("preEntryConstructiveNote");
+      }
+      document.getElementById("profitAction").textContent = action;
+      document.getElementById("profitNote").textContent = note;
+      document.getElementById("profitCurrentPrice").textContent = Number.isFinite(price) ? formatPrice(price) : "--";
+      document.getElementById("profitPnl").textContent = Number.isFinite(pnl) ? pctText(pnl) : "--";
+      document.getElementById("takeProfitOne").textContent = Number.isFinite(tp1) ? formatPrice(tp1) : "--";
+      document.getElementById("takeProfitTwo").textContent = Number.isFinite(tp2) ? formatPrice(tp2) : "--";
+      document.getElementById("trailingStop").textContent = Number.isFinite(trail) ? formatPrice(trail) : "--";
+      document.getElementById("invalidationLevel").textContent = Number.isFinite(invalidation) ? formatPrice(invalidation) : "--";
+      document.getElementById("localHighValue").textContent = Number.isFinite(profitSettings.localHigh) && profitSettings.localHigh > 0 ? formatPrice(profitSettings.localHigh) : "--";
+      document.getElementById("positionLimit").textContent = `${profitSettings.maxPosition || 25}%`;
+      document.getElementById("portfolioRisk").textContent = Number.isFinite(portfolioRisk) ? `~${portfolioRisk.toFixed(2)}%` : "--";
+    }
+
+    function alignSeriesByDate(ids) {
+      const maps = Object.fromEntries(ids.map(id => [id, new Map(seriesFor(id).map(point => [point.date, point.value]))]));
+      const dates = [...maps[ids[0]].keys()].filter(date => ids.every(id => Number.isFinite(maps[id].get(date)))).sort();
+      return dates.map(date => {
+        const row = { date };
+        ids.forEach(id => { row[id] = maps[id].get(date); });
+        return row;
+      });
+    }
+
+    function dailyReturn(current, previous) {
+      if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return 0;
+      return (current / previous) - 1;
+    }
+
+    function maxDrawdownFromEquity(equity) {
+      let peak = equity[0] || 1;
+      let maxDd = 0;
+      equity.forEach(value => {
+        peak = Math.max(peak, value);
+        maxDd = Math.min(maxDd, (value / peak) - 1);
+      });
+      return maxDd * 100;
+    }
+
+    function runBacktest() {
+      const rows = backtestRows;
+      if (rows.length < 397) return null;
+      const fee = (Number(document.getElementById("feeInput")?.value) || 20) / 10000;
+      const slippage = (Number(document.getElementById("slippageInput")?.value) || 10) / 10000;
+      const cost = fee + slippage;
+      let strategyEquity = 1;
+      let holdEquity = 1;
+      let inMarket = false;
+      let previousSignal = false;
+      let trades = 0;
+      let exposureCount = 0;
+      const equity = [1];
+      const tradeReturns = [];
+      let entryEquity = 1;
+      for (let i = 31; i < rows.length; i++) {
+        const today = rows[i];
+        const yesterday = rows[i - 1];
+        const signalDay = rows[i - 1];
+        const signalPrev7 = rows[i - 8] || rows[0];
+        const signalPrev30 = rows[i - 31] || rows[0];
+        const eth7 = dailyReturn(signalDay.eth_price, signalPrev7.eth_price) * 100;
+        const eth30 = dailyReturn(signalDay.eth_price, signalPrev30.eth_price) * 100;
+        const btc7 = dailyReturn(signalDay.eth_btc, signalPrev7.eth_btc) * 100;
+        const riskOk = signalDay.eth_volatility < 85 && signalDay.eth_drawdown > -25;
+        const signal = eth7 > 0 && eth30 > 0 && btc7 > -3 && riskOk;
+        const ret = dailyReturn(today.eth_price, yesterday.eth_price);
+        holdEquity *= (1 + ret);
+        if (signal !== previousSignal) {
+          strategyEquity *= (1 - cost);
+          trades += 1;
+          if (signal) entryEquity = strategyEquity;
+          if (!signal && inMarket) tradeReturns.push((strategyEquity / entryEquity) - 1);
+        }
+        inMarket = signal;
+        previousSignal = signal;
+        if (inMarket) strategyEquity *= (1 + ret);
+        if (inMarket) exposureCount += 1;
+        equity.push(strategyEquity);
+      }
+      if (inMarket) tradeReturns.push((strategyEquity / entryEquity) - 1);
+      const days = rows.length - 31;
+      const returns = equity.slice(1).map((value, index) => (value / equity[index]) - 1);
+      const mean = avg(returns);
+      const variance = avg(returns.map(value => Math.pow(value - mean, 2)));
+      const positive = tradeReturns.filter(value => value > 0);
+      const negative = tradeReturns.filter(value => value < 0);
+      const grossProfit = positive.reduce((sum, value) => sum + value, 0);
+      const grossLoss = Math.abs(negative.reduce((sum, value) => sum + value, 0));
+      return {
+        start: rows[31].date,
+        end: rows.at(-1).date,
+        days,
+        strategyReturn: (strategyEquity - 1) * 100,
+        holdReturn: (holdEquity - 1) * 100,
+        annualized: (Math.pow(strategyEquity, 365 / days) - 1) * 100,
+        maxDrawdown: maxDrawdownFromEquity(equity),
+        winRate: tradeReturns.length ? (positive.length / tradeReturns.length) * 100 : 0,
+        trades,
+        timeInMarket: (exposureCount / days) * 100,
+        profitFactor: grossLoss ? grossProfit / grossLoss : grossProfit ? Infinity : 0,
+        avgTrade: avg(tradeReturns) * 100,
+        worstTrade: Math.min(0, ...tradeReturns) * 100,
+        sharpe: variance ? (mean / Math.sqrt(variance)) * Math.sqrt(365) : 0,
+        oosReturn: ((equity.at(-1) / equity[Math.max(0, equity.length - 91)]) - 1) * 100,
+        feeBps: fee * 10000,
+        slippageBps: slippage * 10000
+      };
+    }
+
+    function renderBacktest() {
+      backtestState = runBacktest();
+      const target = document.getElementById("backtestStats");
+      if (!backtestState) {
+        document.getElementById("backtestPeriod").value = "--";
+        target.innerHTML = `<div class="stat"><div class="stat-label">${t("backtestStrategy")}</div><div class="stat-value">${t("noData")}</div></div>`;
+        return;
+      }
+      document.getElementById("backtestPeriod").value = `${backtestState.start} - ${backtestState.end} (${backtestState.days}D)`;
+      const stats = [
+        [t("backtestStrategy"), pctText(backtestState.strategyReturn)],
+        [t("buyHold"), pctText(backtestState.holdReturn)],
+        [t("annualizedReturn"), pctText(backtestState.annualized)],
+        [t("maxDrawdown"), pctText(backtestState.maxDrawdown)],
+        [t("winRate"), pctText(backtestState.winRate)],
+        [t("trades"), String(backtestState.trades)],
+        [t("timeInMarket"), pctText(backtestState.timeInMarket)],
+        [t("profitFactor"), Number.isFinite(backtestState.profitFactor) ? backtestState.profitFactor.toFixed(2) : "∞"],
+        [t("avgTrade"), pctText(backtestState.avgTrade)],
+        [t("worstTrade"), pctText(backtestState.worstTrade)],
+        [t("sharpeLike"), backtestState.sharpe.toFixed(2)],
+        [t("outSample"), pctText(backtestState.oosReturn)],
+        [t("totalReturn"), `${t("testWindowNote")}`]
+      ];
+      target.innerHTML = stats.map(([label, value]) => `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${value}</div></div>`).join("");
+    }
+
+    function renderQualityPanel(state) {
+      const failed = results.filter(result => result.status !== "live").length;
+      const critical = [
+        { label: t("livePriceSource"), ok: liveState.status === "live", detail: liveState.updatedAt ? formatLocalTime(liveState.updatedAt) : "--" },
+        { label: t("coreFundamentalsSource"), ok: ["eth_price", "ethereum_fees", "ethereum_tvl"].every(id => Boolean(getResult(id))), detail: `${results.filter(result => result.status === "live").length}/${results.length}` },
+        { label: t("l2Source"), ok: ["ecosystem_txcount", "ecosystem_daa", "l2_profit", "blob_data_posted"].every(id => Boolean(getResult(id))), detail: "growthepie" },
+        { label: "Signal guard", ok: state.dataOk, detail: failed ? `${failed} ${t("sourceFailed")}` : t("sourceFresh") }
+      ];
+      document.getElementById("qualityTitle").textContent = state.dataOk ? t("sourceFresh") : t("noTradeHint");
+      document.getElementById("qualityGrid").innerHTML = critical.map(item => `<div class="stat">
+        <div class="stat-label">${item.label}</div>
+        <div class="stat-value">${item.ok ? t("sourceFresh") : t("sourceFailed")}</div>
+        <div class="score-detail">${item.detail}</div>
+      </div>`).join("");
+    }
+
+    function initBacktestControls() {
+      ["feeInput", "slippageInput"].forEach(id => {
+        document.getElementById(id).addEventListener("input", renderBacktest);
+      });
+    }
+
+    function initJournalControls() {
+      const reviewDate = document.getElementById("journalReviewDate");
+      if (!reviewDate.value) reviewDate.valueAsDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      document.getElementById("saveJournal").addEventListener("click", () => {
+        const price = liveState.ticker?.lastPrice || latestValue("eth_price");
+        const entry = {
+          timestamp: new Date().toISOString(),
+          decision: document.getElementById("journalDecision").value,
+          ethPrice: price,
+          regime: scoreState?.regime?.label || t("noEdge"),
+          scores: Object.fromEntries((scoreState?.scores || []).map(score => [score.name, Math.round(score.value)])),
+          reason: document.getElementById("journalReason").value || scoreState?.regime?.action || "",
+          invalidation: document.getElementById("invalidationLevel").textContent,
+          reviewDate: reviewDate.value
+        };
+        journalEntries.unshift(entry);
+        saveJournalEntries();
+        renderJournal();
+      });
+      document.getElementById("exportJournal").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(journalEntries, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "eth_trading_journal.json";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+      document.getElementById("exportJournalCsv").addEventListener("click", () => {
+        const header = ["timestamp", "decision", "ethPrice", "regime", "reason", "invalidation", "reviewDate"];
+        const rows = journalEntries.map(entry => header.map(key => `"${String(entry[key] ?? "").replaceAll("\"", "\"\"")}"`).join(","));
+        const blob = new Blob([[header.join(","), ...rows].join("\n")], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "eth_trading_journal.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+      document.getElementById("clearJournal").addEventListener("click", () => {
+        journalEntries = [];
+        saveJournalEntries();
+        renderJournal();
+      });
+      document.getElementById("journalFilter").addEventListener("input", renderJournal);
+    }
+
+    function renderJournal() {
+      const target = document.getElementById("journalList");
+      const filter = document.getElementById("journalFilter")?.value || "all";
+      const visible = filter === "all" ? journalEntries : journalEntries.filter(entry => entry.decision === filter);
+      const currentPrice = liveState.ticker?.lastPrice || latestValue("eth_price");
+      if (!visible.length) {
+        target.innerHTML = `<li>${t("noData")}</li>`;
+        return;
+      }
+      target.innerHTML = visible.slice(0, 8).map(entry => {
+        const price = Number.isFinite(entry.ethPrice) ? formatPrice(entry.ethPrice) : "--";
+        const since = Number.isFinite(currentPrice) && Number.isFinite(entry.ethPrice) && entry.ethPrice > 0 ? pctText(((currentPrice - entry.ethPrice) / entry.ethPrice) * 100) : "--";
+        return `<li><strong>${entry.decision}</strong> ${price} · ${entry.regime} · ${new Date(entry.timestamp).toLocaleString(currentLanguage === "ko" ? "ko-KR" : "en-US")} · ${t("sinceDecision")} ${since}<br>${entry.reason || ""}</li>`;
+      }).join("");
+    }
+
+    async function refreshLiveMarket() {
+      const requestedRange = liveChartRange;
+      const rangeConfig = LIVE_CHART_RANGES[requestedRange] || LIVE_CHART_RANGES["1h"];
+      try {
+        const [tickerRaw, klineRaw] = await Promise.all([
+          fetchLiveJSON(LIVE_ENDPOINTS.ethTicker),
+          fetchLiveJSON(liveKlineUrl())
+        ]);
+        if (requestedRange !== liveChartRange) return;
+        liveState = {
+          status: "live",
+          ticker: parseTicker(tickerRaw),
+          series: parseKlines(klineRaw, rangeConfig.limit),
+          updatedAt: new Date(),
+          error: ""
+        };
+      } catch (error) {
+        liveState = {
+          ...liveState,
+          status: "failed",
+          error: error.message || String(error)
+        };
+      }
+      renderLiveMarket();
+    }
+
+    function startLivePolling() {
+      renderLiveMarket();
+      refreshLiveMarket();
+      if (livePollHandle) clearInterval(livePollHandle);
+      livePollHandle = setInterval(refreshLiveMarket, LIVE_POLL_MS);
+    }
+
+    function pctChange(series, offset) {
+      if (series.length <= offset) return NaN;
+      const latest = series[series.length - 1].value;
+      const prev = series[series.length - 1 - offset].value;
+      if (!Number.isFinite(prev) || prev === 0) return NaN;
+      return ((latest - prev) / Math.abs(prev)) * 100;
+    }
+
+    function renderSvg(series, height = 52, showArea = false) {
+      if (!series || series.length < 2) return `<div class="chart-meta">${t("sourceUnavailable")}</div>`;
+      const width = 320;
+      const pad = 8;
+      const values = series.map(point => point.value);
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const span = max - min || 1;
+      const points = series.map((point, index) => {
+        const x = pad + (index / Math.max(series.length - 1, 1)) * (width - pad * 2);
+        const y = pad + (1 - ((point.value - min) / span)) * (height - pad * 2);
+        return [x, y];
+      });
+      const path = points.map(([x, y], index) => `${index ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+      const area = `${path} L${points[points.length - 1][0].toFixed(2)},${height - pad} L${points[0][0].toFixed(2)},${height - pad} Z`;
+      return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Metric history">
+        <line class="axis" x1="${pad}" y1="${height - pad}" x2="${width - pad}" y2="${height - pad}"></line>
+        ${showArea ? `<path class="area" d="${area}"></path>` : ""}
+        <path class="line" d="${path}"></path>
+      </svg>`;
+    }
+
+    function changeNode(value, label) {
+      const cls = Number.isFinite(value) ? (value >= 0 ? "up" : "down") : "";
+      const text = Number.isFinite(value) ? `${label} ${value >= 0 ? "+" : ""}${value.toFixed(2)}%` : `${label} ${t("notAvailableShort")}`;
+      return `<span class="change ${cls}">${text}</span>`;
+    }
+
+    function renderFilters() {
+      const target = document.getElementById("filters");
+      target.innerHTML = categories.map(category => `<button class="filter ${category === activeCategory ? "active" : ""}" data-category="${category}">${categoryLabel(category)}</button>`).join("");
+      target.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => {
+          activeCategory = button.dataset.category;
+          renderFilters();
+          renderCards();
+        });
+      });
+    }
+
+    function renderCards() {
+      const grid = document.getElementById("metricGrid");
+      const visible = results.filter(result => activeCategory === "All" || result.category === activeCategory);
+      grid.innerHTML = visible.map(result => {
+        const ok = result.status === "live";
+        const latest = ok ? result.series[result.series.length - 1] : null;
+        const d1 = ok ? pctChange(result.series, 1) : NaN;
+        const d7 = ok ? pctChange(result.series, Math.min(7, result.series.length - 1)) : NaN;
+        return `<article class="card ${ok ? "" : "failed"} ${selectedId === result.id ? "selected" : ""}" data-id="${result.id}">
+          <div class="card-head">
+            <h3 class="metric-name">${metricName(result)}</h3>
+            <span class="badge ${ok ? "live" : "failed"}">${ok ? t("liveBadge") : t("unavailableBadge")}</span>
+          </div>
+          <div class="value">${ok ? formatValue(latest.value, result.unit) : t("sourceUnavailable")}</div>
+          <div class="changes">${changeNode(d1, t("oneDay"))} ${changeNode(d7, t("sevenDays"))}</div>
+          <div class="spark">${ok ? renderSvg(result.series.slice(-40), 52, false) : ""}</div>
+          <div class="why">${metricWhy(result)}</div>
+          ${ok ? metricReading(result, d1, d7) : ""}
+          <div class="source">${ok ? `<a href="${result.url}" target="_blank" rel="noreferrer">${result.source}</a>` : result.error}</div>
+        </article>`;
+      }).join("");
+      grid.querySelectorAll(".card").forEach(card => {
+        card.addEventListener("click", () => {
+          const result = results.find(item => item.id === card.dataset.id);
+          if (result?.status !== "live") return;
+          selectedId = result.id;
+          renderMain(result);
+          renderCards();
+        });
+      });
+    }
+
+    function renderMain(result) {
+      const latest = result.series[result.series.length - 1];
+      document.getElementById("mainTitle").textContent = metricName(result);
+      document.getElementById("mainDescription").textContent = metricWhy(result);
+      document.getElementById("mainMeta").innerHTML = `${formatValue(latest.value, result.unit)}<br>${categoryLabel(result.category)}<br><a href="${result.url}" target="_blank" rel="noreferrer">${result.source}</a>`;
+      document.getElementById("mainChart").innerHTML = renderSvg(result.series, 320, true);
+    }
+
+    function renderFailedList() {
+      const failed = results.filter(result => result.status !== "live");
+      document.getElementById("failedList").innerHTML = failed.map(result => `<li><strong>${metricName(result)}</strong>: ${result.error}</li>`).join("");
+    }
+
+    async function loadMetric(def) {
+      try {
+        const series = await def.compute();
+        if (!Array.isArray(series) || series.length < 2) throw new Error("API returned too few data points for charting");
+        return { ...def, status: "live", series };
+      } catch (error) {
+        return { ...def, status: "failed", series: [], error: error.message || String(error) };
+      }
+    }
+
+    async function init() {
+      applyStaticTranslations();
+      initLanguageToggle();
+      initThemeToggle();
+      initSectionInfo();
+      initLiveChartControls();
+      initProfitControls();
+      initBacktestControls();
+      initJournalControls();
+      if (typeof window !== "undefined") {
+        window.addEventListener("resize", () => renderLiveMarket());
+      }
+      startLivePolling();
+      renderFilters();
+      results = await Promise.all(metricDefs.map(loadMetric));
+      await loadBacktestData();
+      const live = results.filter(result => result.status === "live");
+      selectedId = live[0]?.id || null;
+      document.getElementById("summaryTotal").textContent = String(metricDefs.length);
+      document.getElementById("summaryLive").textContent = String(live.length);
+      document.getElementById("summaryFailed").textContent = String(results.length - live.length);
+      document.getElementById("lastUpdated").textContent = `${t("lastLoaded")} ${new Date().toLocaleString(currentLanguage === "ko" ? "ko-KR" : "en-US")}`;
+      if (live[0]) renderMain(live[0]);
+      renderCards();
+      renderFailedList();
+      renderDecisionSuite();
+    }
+
+    init();
+  </script>
+</body>
+</html>
